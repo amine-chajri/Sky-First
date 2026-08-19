@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-night-950 font-body text-cream antialiased;
+  }
+
+  ::selection {
+    @apply bg-gold-400/40 text-cream;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-night-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-night-700;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gold-600;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply border border-white/10 bg-white/[0.06] backdrop-blur-xl;
+  }
+
+  .glass-strong {
+    @apply border border-white/15 bg-night-800/70 backdrop-blur-2xl;
+  }
+
+  .gold-text {
+    background: linear-gradient(120deg, #f5dd8f, #eab035 45%, #bc781e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 px-7 py-3 text-sm font-semibold text-night-950 shadow-gold-glow transition-all duration-300 hover:from-gold-200 hover:to-gold-400 hover:shadow-[0_0_60px_rgba(234,176,53,0.4)] focus:outline-none focus:ring-2 focus:ring-gold-300 focus:ring-offset-2 focus:ring-offset-night-950 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.04] px-7 py-3 text-sm font-semibold text-cream backdrop-blur-md transition-all duration-300 hover:border-gold-400/60 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-gold-300/50 active:scale-[0.98];
+  }
+
+  .section-label {
+    @apply mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-gold-400;
+  }
+
+  .section-title {
+    @apply font-display text-4xl font-semibold leading-tight text-cream sm:text-5xl;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-white/10 bg-night-900/60 px-4 py-3 text-sm text-cream placeholder:text-cream/30 transition-colors focus:border-gold-400/60 focus:outline-none focus:ring-2 focus:ring-gold-400/20;
+  }
+
+  .field-error {
+    @apply mt-1 text-xs text-red-400;
+  }
+}
