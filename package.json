@@ -20,5 +20,8 @@
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.62.4"
+  },
+  "dependencies": {
+    "debug": "^4.4.3"
   }
 }
