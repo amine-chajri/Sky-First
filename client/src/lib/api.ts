@@ -8,8 +8,12 @@ import type {
   ReservationResponse,
 } from "../types";
 
+const apiUrl = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : "/api";
+
 export const api = axios.create({
-  baseURL: "/api",
+  baseURL: apiUrl,
   timeout: 15000,
   headers: { "Content-Type": "application/json" },
 });
