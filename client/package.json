@@ -10,15 +10,10 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.9.0",
-    "@tanstack/react-query": "^5.51.23",
-    "axios": "^1.7.3",
     "framer-motion": "^11.3.28",
     "lucide-react": "^0.428.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-hook-form": "^7.52.1",
-    "zod": "^3.23.8"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.4",

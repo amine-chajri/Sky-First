@@ -5,12 +5,11 @@ import { CATEGORY_LABELS } from "../data/business";
 import type { MenuCategory } from "../types";
 import { useMenu } from "../hooks/useMenu";
 import type { MenuItem } from "../types";
-import { extractApiError } from "../lib/api";
 
 const CATEGORIES = Object.keys(CATEGORY_LABELS) as MenuCategory[];
 
 export function MenuSection() {
-  const { data: items, isLoading, error } = useMenu();
+  const { data: items } = useMenu();
   const [activeCategory, setActiveCategory] = useState<MenuCategory | "all">("all");
   const [query, setQuery] = useState("");
   const [vegetarianOnly, setVegetarianOnly] = useState(false);
@@ -88,24 +87,7 @@ export function MenuSection() {
       </div>
 
       {/* Results */}
-      {isLoading && (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-72 animate-pulse rounded-2xl border border-white/5 bg-white/[0.03]"
-            />
-          ))}
-        </div>
-      )}
-
-      {error && (
-        <div className="mx-auto max-w-lg rounded-xl border border-red-400/30 bg-red-500/10 p-5 text-center text-sm text-red-300">
-          {extractApiError(error)}
-        </div>
-      )}
-
-      {!isLoading && !error && filtered.length === 0 && (
+      {filtered.length === 0 && (
         <div className="mx-auto max-w-md rounded-xl border border-dashed border-white/15 p-10 text-center text-sm text-cream/50">
           No dishes match your filters. Try clearing the search.
         </div>

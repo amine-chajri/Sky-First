@@ -11,6 +11,10 @@ export const BUSINESS = {
   phoneHref: "tel:+212659333330",
   whatsappHref:
     "https://wa.me/212659333330?text=Hello%20Sky%20First%2C%20I%27d%20like%20to%20order%20drive-through%2Ftakeout.",
+  reservationWhatsappHref:
+    "https://wa.me/212659333330?text=Hello%20Sky%20First%2C%20I%27d%20like%20to%20reserve%20a%20table.",
+  contactWhatsappHref:
+    "https://wa.me/212659333330?text=Hello%20Sky%20First%2C%20I%20have%20a%20question.",
   mapsDirectionsHref:
     "https://www.google.com/maps/dir/?api=1&destination=4+Av.+de+France,+Rabat+10090,+Morocco",
   mapsEmbedSrc:
