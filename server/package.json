@@ -4,13 +4,11 @@
   "private": true,
   "description": "Sky First rooftop restaurant backend API",
   "type": "module",
-  "main": "dist/server.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "tsx watch server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "seed": "tsx seed/run.ts",
-    "typecheck": "tsc --noEmit"
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "seed": "node seed/run.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -20,13 +18,5 @@
     "mongoose": "^9.11.0",
     "morgan": "^1.10.0",
     "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/morgan": "^1.9.9",
-    "@types/node": "^22.5.0",
-    "tsx": "^4.17.0",
-    "typescript": "^5.5.4"
   }
 }

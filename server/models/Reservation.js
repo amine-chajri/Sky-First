@@ -1,20 +1,16 @@
-import mongoose, { type InferSchemaType } from "mongoose";
+import mongoose from "mongoose";
 
 export const SEATING_PREFERENCES = [
   "panoramic-rooftop",
   "indoor-lounge",
   "standard-dining",
-] as const;
-
-export type SeatingPreference = (typeof SEATING_PREFERENCES)[number];
+];
 
 export const RESERVATION_STATUSES = [
   "confirmed",
   "cancelled",
   "completed",
-] as const;
-
-export type ReservationStatus = (typeof RESERVATION_STATUSES)[number];
+];
 
 const reservationSchema = new mongoose.Schema(
   {
@@ -40,21 +36,9 @@ const reservationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export type ReservationDoc = InferSchemaType<typeof reservationSchema> & {
-  _id: mongoose.Types.ObjectId;
-};
-
 export const Reservation = mongoose.model("Reservation", reservationSchema);
 
-export type NewReservation = Omit<
-  ReservationDoc,
-  "_id" | "createdAt" | "updatedAt"
->;
-
-export async function countBookedReservations(
-  date: string,
-  timeSlot: string
-): Promise<number> {
+export async function countBookedReservations(date, timeSlot) {
   return Reservation.countDocuments({
     date,
     timeSlot,
@@ -62,26 +46,21 @@ export async function countBookedReservations(
   });
 }
 
-export async function bookedCountBySlot(
-  date: string
-): Promise<Map<string, number>> {
-  const rows = await Reservation.aggregate<{ _id: string; count: number }>([
+export async function bookedCountBySlot(date) {
+  const rows = await Reservation.aggregate([
     { $match: { date, status: "confirmed" } },
     { $group: { _id: "$timeSlot", count: { $sum: 1 } } },
   ]);
   return new Map(rows.map((r) => [r._id, r.count]));
 }
 
-export async function listReservations(filter: {
-  date?: string;
-  status?: string;
-}) {
-  const query: Record<string, unknown> = {};
+export async function listReservations(filter = {}) {
+  const query = {};
   if (filter.date) query.date = filter.date;
   if (filter.status) query.status = filter.status;
   return Reservation.find(query).sort({ date: 1, timeSlot: 1 }).lean();
 }
 
-export async function createReservation(data: NewReservation) {
+export async function createReservation(data) {
   return Reservation.create({ ...data, status: "confirmed" });
 }

@@ -1,21 +1,7 @@
-import type { MenuCategory } from "../models/MenuItem.js";
-
-export interface SeedMenuItem {
-  name: string;
-  description: string;
-  category: MenuCategory;
-  price: number;
-  image: string;
-  tags: string[];
-  isVegetarian: boolean;
-  isChefsSpecial: boolean;
-  sortOrder: number;
-}
-
-const img = (name: string) =>
+const img = (name) =>
   `https://images.unsplash.com/${name}?auto=format&fit=crop&w=800&q=80`;
 
-export const seedMenuItems: SeedMenuItem[] = [
+export const seedMenuItems = [
   // ---------- Breakfast ----------
   {
     name: "Continental Breakfast",
@@ -254,4 +240,4 @@ export const reviewsSeed = [
     author: "Verified Google Review",
     rating: 4,
   },
-] as const;
+];

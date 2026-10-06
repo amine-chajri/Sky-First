@@ -3,10 +3,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const config = {
-  port: Number(process.env.PORT ?? 5000),
-  clientOrigin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
-  mongoUri: process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/skyfirst",
-} as const;
+  port: Number(process.env.PORT),
+  clientOrigin: process.env.CLIENT_ORIGIN ,
+  mongoUri: process.env.MONGODB_URI ,
+};
 
 export const BUSINESS = {
   name: "Sky First",
@@ -20,4 +20,4 @@ export const BUSINESS = {
   rating: 4.6,
   reviewCount: 519,
   priceRange: "MAD 50-100",
-} as const;
+};

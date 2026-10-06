@@ -11,7 +11,7 @@ async function bootstrap() {
     console.log(`[server] Sky First API listening on http://localhost:${config.port}`);
   });
 
-  server.on("error", (err: NodeJS.ErrnoException) => {
+  server.on("error", (err) => {
     if (err.code === "EADDRINUSE") {
       console.error(
         `[server] Port ${config.port} is already in use. Stop the other process or set PORT to a free port in server/.env.`

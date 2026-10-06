@@ -19,7 +19,7 @@ router.get(
   "/availability",
   validateQuery(availabilitySchema),
   asyncHandler(async (req, res) => {
-    const { date } = req.query as { date: string };
+    const { date } = req.query;
 
     const bookedMap = await bookedCountBySlot(date);
 
@@ -70,7 +70,7 @@ router.post(
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const { date, status } = req.query as { date?: string; status?: string };
+    const { date, status } = req.query;
     const reservations = await listReservations({ date, status });
     res.json({ reservations });
   })

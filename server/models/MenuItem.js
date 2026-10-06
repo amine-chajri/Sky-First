@@ -1,13 +1,11 @@
-import mongoose, { type InferSchemaType } from "mongoose";
+import mongoose from "mongoose";
 
 export const MENU_CATEGORIES = [
   "breakfast",
   "mains",
   "desserts",
   "beverages",
-] as const;
-
-export type MenuCategory = (typeof MENU_CATEGORIES)[number];
+];
 
 const menuItemSchema = new mongoose.Schema(
   {
@@ -25,27 +23,16 @@ const menuItemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export type MenuItemDoc = InferSchemaType<typeof menuItemSchema> & {
-  _id: mongoose.Types.ObjectId;
-};
-
 export const MenuItem = mongoose.model("MenuItem", menuItemSchema);
 
-export interface MenuQuery {
-  category?: string;
-  q?: string;
-  vegetarian?: boolean;
-  special?: boolean;
-}
-
-export async function listMenuItems(query: MenuQuery) {
+export async function listMenuItems(query = {}) {
   const { category, q, vegetarian, special } = query;
-  const filter: Record<string, unknown> = { isAvailable: true };
+  const filter = { isAvailable: true };
 
   if (category) filter.category = category;
   if (vegetarian) filter.isVegetarian = true;
   if (special) filter.isChefsSpecial = true;
-  if (q?.trim()) {
+  if (q && q.trim()) {
     filter.$or = [
       { name: { $regex: q.trim(), $options: "i" } },
       { description: { $regex: q.trim(), $options: "i" } },
@@ -55,13 +42,10 @@ export async function listMenuItems(query: MenuQuery) {
   return MenuItem.find(filter).sort({ sortOrder: 1, name: 1 }).lean();
 }
 
-export async function menuCategoryCounts(): Promise<
-  { _id: MenuCategory; count: number }[]
-> {
-  const rows = await MenuItem.aggregate<{ _id: MenuCategory; count: number }>([
+export async function menuCategoryCounts() {
+  return MenuItem.aggregate([
     { $match: { isAvailable: true } },
     { $group: { _id: "$category", count: { $sum: 1 } } },
     { $sort: { _id: 1 } },
   ]);
-  return rows;
 }

@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   listMenuItems,
   menuCategoryCounts,
-  type MenuCategory,
 } from "../models/MenuItem.js";
 import { asyncHandler } from "../middleware/index.js";
 
@@ -11,12 +10,7 @@ const router = Router();
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const { category, q, vegetarian, special } = req.query as {
-      category?: string;
-      q?: string;
-      vegetarian?: string;
-      special?: string;
-    };
+    const { category, q, vegetarian, special } = req.query;
 
     const items = await listMenuItems({
       category,
@@ -32,8 +26,7 @@ router.get(
 router.get(
   "/categories",
   asyncHandler(async (_req, res) => {
-    const categories: { _id: MenuCategory; count: number }[] =
-      await menuCategoryCounts();
+    const categories = await menuCategoryCounts();
     res.json({ categories });
   })
 );

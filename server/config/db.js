@@ -3,7 +3,7 @@ import { config } from "./index.js";
 import { MenuItem } from "../models/MenuItem.js";
 import { seedMenuItems } from "../seed/data.js";
 
-export async function connectDB(): Promise<void> {
+export async function connectDB() {
   await mongoose.connect(config.mongoUri);
   console.log(`[db] MongoDB connected: ${mongoose.connection.name}`);
 
@@ -16,6 +16,6 @@ export async function connectDB(): Promise<void> {
   }
 }
 
-export async function disconnectDB(): Promise<void> {
+export async function disconnectDB() {
   await mongoose.disconnect();
 }

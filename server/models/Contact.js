@@ -1,8 +1,6 @@
-import mongoose, { type InferSchemaType } from "mongoose";
+import mongoose from "mongoose";
 
-export const CONTACT_STATUSES = ["new", "read", "replied"] as const;
-
-export type ContactStatus = (typeof CONTACT_STATUSES)[number];
+export const CONTACT_STATUSES = ["new", "read", "replied"];
 
 const contactSchema = new mongoose.Schema(
   {
@@ -16,14 +14,8 @@ const contactSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export type ContactDoc = InferSchemaType<typeof contactSchema> & {
-  _id: mongoose.Types.ObjectId;
-};
-
 export const Contact = mongoose.model("Contact", contactSchema);
 
-export type NewContact = Omit<ContactDoc, "_id" | "createdAt" | "updatedAt">;
-
-export async function createContact(data: NewContact) {
+export async function createContact(data) {
   return Contact.create({ ...data, status: "new" });
 }
