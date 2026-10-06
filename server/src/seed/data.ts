@@ -1,12 +1,23 @@
-import type { MenuItem } from "../types";
+import type { MenuCategory } from "../models/MenuItem.js";
+
+export interface SeedMenuItem {
+  name: string;
+  description: string;
+  category: MenuCategory;
+  price: number;
+  image: string;
+  tags: string[];
+  isVegetarian: boolean;
+  isChefsSpecial: boolean;
+  sortOrder: number;
+}
 
 const img = (name: string) =>
   `https://images.unsplash.com/${name}?auto=format&fit=crop&w=800&q=80`;
 
-export const menuItems: MenuItem[] = [
+export const seedMenuItems: SeedMenuItem[] = [
   // ---------- Breakfast ----------
   {
-    _id: "continental-breakfast",
     name: "Continental Breakfast",
     description:
       "Freshly baked croissants, artisan bread, butter, jams, seasonal fruit platter, and choice of juice or hot coffee.",
@@ -16,10 +27,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Continental", "Breakfast"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 1,
   },
   {
-    _id: "balboula-royale",
     name: "Balboula Royale",
     description:
       "Our signature traditional Moroccan balboula (barley porridge) slow-cooked with cinnamon, nuts, and orange blossom.",
@@ -29,10 +39,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Traditional", "Chef's Special"],
     isVegetarian: true,
     isChefsSpecial: true,
-    isAvailable: true,
+    sortOrder: 2,
   },
   {
-    _id: "berber-pastry-basket",
     name: "Berber Pastry Basket",
     description:
       "Selection of msemen, harcha, and beghrir served with honey, olive oil, and Moroccan amlou.",
@@ -42,10 +51,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Pastries", "Moroccan"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 3,
   },
   {
-    _id: "avocado-egg-toast",
     name: "Avocado Egg Toast",
     description:
       "Sourdough toast, smashed avocado, poached eggs, cherry tomatoes, and chili flakes with a lemon drizzle.",
@@ -55,12 +63,11 @@ export const menuItems: MenuItem[] = [
     tags: ["Healthy", "Brunch"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 4,
   },
 
   // ---------- Main Courses (Italian / Pasta, Pizzas) ----------
   {
-    _id: "tagliatelle-al-tartufo",
     name: "Tagliatelle al Tartufo",
     description:
       "Fresh egg tagliatelle in a creamy truffle sauce topped with shaved parmesan and chives.",
@@ -70,10 +77,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Italian", "Pasta", "Chef's Special"],
     isVegetarian: true,
     isChefsSpecial: true,
-    isAvailable: true,
+    sortOrder: 1,
   },
   {
-    _id: "spaghetti-alle-vongole",
     name: "Spaghetti alle Vongole",
     description:
       "Spaghetti tossed with fresh clams, white wine, garlic, and a hint of chili — a coastal classic.",
@@ -83,10 +89,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Italian", "Pasta", "Seafood"],
     isVegetarian: false,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 2,
   },
   {
-    _id: "quattro-formaggi-pizza",
     name: "Quattro Formaggi Pizza",
     description:
       "Wood-fired pizza with mozzarella, gorgonzola, parmesan, and goat cheese over a blistered crust.",
@@ -96,10 +101,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Pizza", "Vegetarian"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 3,
   },
   {
-    _id: "pizza-agdal",
     name: "Pizza Agdal",
     description:
       "Our rooftop signature pizza: tomato base, mozzarella, grilled chicken, roasted peppers, olives, and oregano.",
@@ -109,10 +113,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Pizza", "Signature"],
     isVegetarian: false,
     isChefsSpecial: true,
-    isAvailable: true,
+    sortOrder: 4,
   },
   {
-    _id: "risotto-ai-funghi",
     name: "Risotto ai Funghi",
     description:
       "Creamy porcini mushroom risotto finished with butter, parmesan, and a drizzle of truffle oil.",
@@ -122,12 +125,11 @@ export const menuItems: MenuItem[] = [
     tags: ["Italian", "Risotto"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 5,
   },
 
   // ---------- Desserts & Chocolate ----------
   {
-    _id: "fondant-au-chocolat",
     name: "Fondant au Chocolat",
     description:
       "Warm Belgian chocolate fondant with a molten center, served with vanilla bean ice cream.",
@@ -137,10 +139,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Chocolate", "Hot dessert"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 1,
   },
   {
-    _id: "chocolate-souffle-sky-first",
     name: "Chocolate Soufflé Sky First",
     description:
       "Airy dark chocolate soufflé dusted with cocoa powder — our most requested dessert on the terrace.",
@@ -150,10 +151,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Chocolate", "Chef's Special"],
     isVegetarian: true,
     isChefsSpecial: true,
-    isAvailable: true,
+    sortOrder: 2,
   },
   {
-    _id: "mille-feuille-pistache",
     name: "Mille-Feuille Pistache",
     description:
       "Crispy layers of puff pastry with pistachio cream and candied pistachios.",
@@ -163,10 +163,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Pastry"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 3,
   },
   {
-    _id: "brioche-gourmande",
     name: "Brioche Gourmande",
     description:
       "Caramelized brioche with dark chocolate chunks and a scoop of salted caramel ice cream.",
@@ -176,12 +175,11 @@ export const menuItems: MenuItem[] = [
     tags: ["Chocolate", "Brioche"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 4,
   },
 
   // ---------- Beverages / Specialty Coffee ----------
   {
-    _id: "specialty-flat-white",
     name: "Specialty Flat White",
     description:
       "Double ristretto and velvety micro-foamed milk from single-origin Ethiopian beans.",
@@ -191,10 +189,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Coffee", "Specialty"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 1,
   },
   {
-    _id: "iced-matcha-latte",
     name: "Iced Matcha Latte",
     description:
       "Ceremonial-grade matcha whisked with oat milk over ice and a hint of vanilla syrup.",
@@ -204,10 +201,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Cold", "Tea"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 2,
   },
   {
-    _id: "moroccan-mint-tea",
     name: "Moroccan Mint Tea",
     description:
       "Green tea brewed with fresh spearmint and sugar, poured the traditional way.",
@@ -217,10 +213,9 @@ export const menuItems: MenuItem[] = [
     tags: ["Hot", "Traditional"],
     isVegetarian: true,
     isChefsSpecial: false,
-    isAvailable: true,
+    sortOrder: 3,
   },
   {
-    _id: "virgin-agdal-sunset",
     name: "Virgin Agdal Sunset",
     description:
       "Non-alcoholic layered mocktail with mango, passion fruit, and grenadine over crushed ice.",
@@ -230,6 +225,33 @@ export const menuItems: MenuItem[] = [
     tags: ["Cold", "Mocktail"],
     isVegetarian: true,
     isChefsSpecial: true,
-    isAvailable: true,
+    sortOrder: 4,
   },
 ];
+
+export const reviewsSeed = [
+  {
+    quote:
+      "The breakfast was delicious and the customer service was very nice. Amazing view over Agdal...",
+    author: "Verified Google Review",
+    rating: 5,
+  },
+  {
+    quote:
+      "Food and service is of extreme quality and fantastic value.",
+    author: "Verified Google Review",
+    rating: 5,
+  },
+  {
+    quote:
+      "The rooftop terrace at sunset is unforgettable. Pasta was superb and the staff treated us like family.",
+    author: "Verified Google Review",
+    rating: 5,
+  },
+  {
+    quote:
+      "Best specialty coffee in Rabat. The chocolate fondant alone is worth the trip up.",
+    author: "Verified Google Review",
+    rating: 4,
+  },
+] as const;
