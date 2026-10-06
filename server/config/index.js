@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const config = {
-  port: Number(process.env.PORT),
-  clientOrigin: process.env.CLIENT_ORIGIN ,
-  mongoUri: process.env.MONGODB_URI ,
+  port: Number(process.env.PORT ?? 5000),
+  clientOrigin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
+  mongoUri: process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/skyfirst",
+  jwtSecret: process.env.JWT_SECRET ?? "sky-first-dev-secret",
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
 };
 
 export const BUSINESS = {

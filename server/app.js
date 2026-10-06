@@ -9,6 +9,8 @@ import menuRoutes from "./routes/menu.js";
 import reservationRoutes from "./routes/reservations.js";
 import contactRoutes from "./routes/contact.js";
 import healthRoutes from "./routes/health.js";
+import authRoutes from "./routes/auth.js";
+import usersRoutes from "./routes/users.js";
 
 export function createApp() {
   const app = express();
@@ -29,6 +31,8 @@ export function createApp() {
   app.use("/api/menu", menuRoutes);
   app.use("/api/reservations", reservationRoutes);
   app.use("/api/contact", contactRoutes);
+  app.use("/api/auth", authRoutes);
+  app.use("/api/users", usersRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

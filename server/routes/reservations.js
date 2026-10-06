@@ -4,9 +4,16 @@ import {
   countBookedReservations,
   createReservation,
   listReservations,
+  Reservation,
 } from "../models/Reservation.js";
-import { validate, validateQuery, asyncHandler, ApiError } from "../middleware/index.js";
+import {
+  validate,
+  validateQuery,
+  asyncHandler,
+  ApiError,
+} from "../middleware/index.js";
 import { reservationSchema, availabilitySchema } from "../schemas/validation.js";
+import { requireAuth, requireRole } from "../middleware/auth.js";
 import {
   generateConfirmationCode,
   businessTimeSlots,
@@ -69,10 +76,31 @@ router.post(
 
 router.get(
   "/",
+  requireAuth,
+  requireRole("admin", "waiter"),
   asyncHandler(async (req, res) => {
     const { date, status } = req.query;
     const reservations = await listReservations({ date, status });
     res.json({ reservations });
+  })
+);
+
+router.patch(
+  "/:id/status",
+  requireAuth,
+  requireRole("admin", "waiter"),
+  asyncHandler(async (req, res) => {
+    const { status } = req.body ?? {};
+    if (!["confirmed", "cancelled", "completed"].includes(status)) {
+      throw new ApiError(400, "Invalid status");
+    }
+    const reservation = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    if (!reservation) throw new ApiError(404, "Reservation not found");
+    res.json({ reservation });
   })
 );
 

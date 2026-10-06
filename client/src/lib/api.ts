@@ -18,6 +18,14 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("skyfirst_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export async function fetchMenu(): Promise<MenuItem[]> {
   const { data } = await api.get<{ items: MenuItem[] }>("/menu");
   return data.items;
