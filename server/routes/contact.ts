@@ -9,7 +9,7 @@ router.post(
   "/",
   validate(contactSchema),
   asyncHandler(async (req, res) => {
-    const contact = createContact(req.body);
+    const contact = await createContact(req.body);
     res.status(201).json({
       message: "Message received. Our team will get back to you shortly.",
       id: contact._id,

@@ -1,7 +1,7 @@
-import { createApp } from "../src/app.js";
-import { connectDB } from "../src/config/db.js";
+import { createApp } from "../app.js";
+import { connectDB } from "../config/db.js";
 
-connectDB();
+await connectDB();
 
 const app = createApp();
 

@@ -6,13 +6,13 @@ async function seed() {
   try {
     await connectDB();
 
-    MenuItem.deleteAll();
-    const inserted = MenuItem.insertMany(
+    await MenuItem.deleteMany({});
+    const inserted = await MenuItem.insertMany(
       seedMenuItems.map((item) => ({ ...item, isAvailable: true }))
     );
     console.log(`[seed] Inserted ${inserted.length} menu items`);
 
-    for (const c of menuCategoryCounts()) {
+    for (const c of await menuCategoryCounts()) {
       console.log(`[seed]   ${c._id}: ${c.count} items`);
     }
   } finally {

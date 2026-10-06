@@ -21,7 +21,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const { date } = req.query as { date: string };
 
-    const bookedMap = bookedCountBySlot(date);
+    const bookedMap = await bookedCountBySlot(date);
 
     const slots = businessTimeSlots().map((time) => {
       const taken = bookedMap.get(time) ?? 0;
@@ -42,11 +42,11 @@ router.post(
   asyncHandler(async (req, res) => {
     const data = req.body;
 
-    if (countBookedReservations(data.date, data.timeSlot) >= MAX_SLOT_CAPACITY) {
+    if ((await countBookedReservations(data.date, data.timeSlot)) >= MAX_SLOT_CAPACITY) {
       throw new ApiError(409, "This time slot is fully booked. Please pick another.");
     }
 
-    const reservation = createReservation({
+    const reservation = await createReservation({
       ...data,
       confirmationCode: generateConfirmationCode(),
     });
@@ -71,7 +71,7 @@ router.get(
   "/",
   asyncHandler(async (req, res) => {
     const { date, status } = req.query as { date?: string; status?: string };
-    const reservations = listReservations({ date, status });
+    const reservations = await listReservations({ date, status });
     res.json({ reservations });
   })
 );

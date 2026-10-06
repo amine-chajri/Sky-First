@@ -18,7 +18,7 @@ router.get(
       special?: string;
     };
 
-    const items = listMenuItems({
+    const items = await listMenuItems({
       category,
       q,
       vegetarian: vegetarian === "true",
@@ -33,7 +33,7 @@ router.get(
   "/categories",
   asyncHandler(async (_req, res) => {
     const categories: { _id: MenuCategory; count: number }[] =
-      menuCategoryCounts();
+      await menuCategoryCounts();
     res.json({ categories });
   })
 );
