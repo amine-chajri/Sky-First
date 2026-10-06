@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
+import helmetImport from "helmet";
 import morgan from "morgan";
+import type { RequestHandler } from "express";
 import { config } from "./config/index.js";
 import { errorHandler, notFoundHandler } from "./middleware/index.js";
 import menuRoutes from "./routes/menu.js";
@@ -11,6 +12,9 @@ import healthRoutes from "./routes/health.js";
 
 export function createApp() {
   const app = express();
+
+  const helmet = ((helmetImport as unknown as { default?: unknown }).default ??
+    helmetImport) as (options?: Record<string, unknown>) => RequestHandler;
 
   app.use(helmet());
   app.use(
