@@ -7,9 +7,23 @@ async function bootstrap() {
 
   await connectDB();
 
-  app.listen(config.port, () => {
+  const server = app.listen(config.port, () => {
     console.log(`[server] Sky First API listening on http://localhost:${config.port}`);
+  });
+
+  server.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(
+        `[server] Port ${config.port} is already in use. Stop the other process or set PORT to a free port in server/.env.`
+      );
+    } else {
+      console.error("[server] Failed to start:", err);
+    }
+    process.exit(1);
   });
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error("[server] Startup error:", err);
+  process.exit(1);
+});
