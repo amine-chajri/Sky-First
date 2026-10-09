@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Phone, Star, X } from "lucide-react";
+import { Menu, Phone, Star, X, LayoutDashboard, LogIn, LogOut, User } from "lucide-react";
 import { BUSINESS, currentOpenStatus, isOpenNow } from "../data/business";
 import { useReservationModal } from "./reservation/ReservationModalContext";
+import { useAuth } from "../lib/auth";
+import { useNavigate } from "react-router-dom";
 
 const NAV_LINKS = [
   { href: "#menu", label: "Menu" },
@@ -13,6 +15,8 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const { openReservation } = useReservationModal();
+  const { user, logout, token } = useAuth();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -22,6 +26,77 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  const renderAuthLinks = () => {
+    if (!token) {
+      return (
+        <a
+          href="/login"
+          className="btn-gold !px-5 !py-2.5"
+        >
+          <LogIn className="h-4 w-4 mr-2" />
+          Sign In
+        </a>
+      );
+    }
+
+    if (user?.role === "admin") {
+      return (
+        <>
+          <a
+            href="/admin"
+            className="btn-gold !px-5 !py-2.5 flex items-center gap-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Admin Dashboard
+          </a>
+          <button
+            onClick={handleLogout}
+            className="btn-outline !px-4 !py-2.5"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </button>
+        </>
+      );
+    }
+
+    if (user?.role === "waiter") {
+      return (
+        <>
+          <a
+            href="/waiter"
+            className="btn-gold !px-5 !py-2.5 flex items-center gap-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Waiter Dashboard
+          </a>
+          <button
+            onClick={handleLogout}
+            className="btn-outline !px-4 !py-2.5"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </button>
+        </>
+      );
+    }
+
+    return (
+      <button
+        onClick={handleLogout}
+        className="btn-outline !px-4 !py-2.5"
+      >
+        <LogOut className="h-4 w-4 mr-2" />
+        Logout
+      </button>
+    );
+  };
 
   return (
     <header
@@ -77,6 +152,7 @@ export function Navbar() {
             <Star className="h-4 w-4" />
             Reserve a Table
           </button>
+          {renderAuthLinks()}
         </div>
 
         <button
@@ -122,6 +198,9 @@ export function Navbar() {
               >
                 Reserve a Table
               </button>
+              <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
+                {renderAuthLinks()}
+              </div>
             </div>
           </motion.div>
         )}

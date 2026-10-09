@@ -6,9 +6,11 @@ import {
   MENU_CATEGORIES,
 } from "../models/MenuItem.js";
 import { asyncHandler, ApiError } from "../middleware/index.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { requireAuth, requireActiveUser, requireRole } from "../middleware/auth.js";
 
 const router = Router();
+
+const adminAuth = [requireAuth, requireActiveUser, requireRole("admin")];
 
 router.get(
   "/",
@@ -36,8 +38,7 @@ router.get(
 
 router.get(
   "/all",
-  requireAuth,
-  requireRole("admin"),
+  ...adminAuth,
   asyncHandler(async (_req, res) => {
     const items = await MenuItem.find().sort({ sortOrder: 1, name: 1 }).lean();
     res.json({ items });
@@ -46,8 +47,7 @@ router.get(
 
 router.post(
   "/",
-  requireAuth,
-  requireRole("admin"),
+  ...adminAuth,
   asyncHandler(async (req, res) => {
     const { name, description, category, price } = req.body ?? {};
     if (!name || !description || !MENU_CATEGORIES.includes(category) || typeof price !== "number") {
@@ -60,8 +60,7 @@ router.post(
 
 router.put(
   "/:id",
-  requireAuth,
-  requireRole("admin"),
+  ...adminAuth,
   asyncHandler(async (req, res) => {
     const item = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -74,8 +73,7 @@ router.put(
 
 router.delete(
   "/:id",
-  requireAuth,
-  requireRole("admin"),
+  ...adminAuth,
   asyncHandler(async (req, res) => {
     const item = await MenuItem.findByIdAndDelete(req.params.id);
     if (!item) throw new ApiError(404, "Item not found");

@@ -25,12 +25,14 @@ export async function connectDB() {
         email: "admin@skyfirst.ma",
         password: await bcrypt.hash("admin123", 10),
         role: "admin",
+        isActive: true,
       },
       {
         name: "Waiter",
         email: "waiter@skyfirst.ma",
         password: await bcrypt.hash("waiter123", 10),
         role: "waiter",
+        isActive: true,
       },
     ]);
     console.log("[db] Seeded default users (admin@skyfirst.ma / admin123, waiter@skyfirst.ma / waiter123)");

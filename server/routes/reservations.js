@@ -13,7 +13,7 @@ import {
   ApiError,
 } from "../middleware/index.js";
 import { reservationSchema, availabilitySchema } from "../schemas/validation.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { requireAuth, requireActiveUser, requireRole } from "../middleware/auth.js";
 import {
   generateConfirmationCode,
   businessTimeSlots,
@@ -21,6 +21,8 @@ import {
 } from "../utils/index.js";
 
 const router = Router();
+
+const staffAuth = [requireAuth, requireActiveUser, requireRole("admin", "waiter")];
 
 router.get(
   "/availability",
@@ -76,8 +78,7 @@ router.post(
 
 router.get(
   "/",
-  requireAuth,
-  requireRole("admin", "waiter"),
+  ...staffAuth,
   asyncHandler(async (req, res) => {
     const { date, status } = req.query;
     const reservations = await listReservations({ date, status });
@@ -87,8 +88,7 @@ router.get(
 
 router.patch(
   "/:id/status",
-  requireAuth,
-  requireRole("admin", "waiter"),
+  ...staffAuth,
   asyncHandler(async (req, res) => {
     const { status } = req.body ?? {};
     if (!["confirmed", "cancelled", "completed"].includes(status)) {

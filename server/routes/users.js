@@ -2,11 +2,13 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { User, USER_ROLES } from "../models/User.js";
 import { asyncHandler, ApiError } from "../middleware/index.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { requireAuth, requireActiveUser, requireRole } from "../middleware/auth.js";
 
 const router = Router();
 
-router.use(requireAuth, requireRole("admin"));
+const adminAuth = [requireAuth, requireActiveUser, requireRole("admin")];
+
+router.use(...adminAuth);
 
 router.get(
   "/",
@@ -32,6 +34,44 @@ router.post(
       role,
     });
     res.status(201).json({ user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+  })
+);
+
+router.patch(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const { name, email, password, role, isActive } = req.body ?? {};
+    const user = await User.findById(req.params.id);
+    if (!user) throw new ApiError(404, "User not found");
+
+    if (email) {
+      const exists = await User.findOne({ email: String(email).toLowerCase(), _id: { $ne: user._id } });
+      if (exists) throw new ApiError(409, "Email already in use");
+      user.email = String(email).toLowerCase();
+    }
+    if (name) user.name = name;
+    if (role) {
+      if (!USER_ROLES.includes(role)) throw new ApiError(400, "Invalid role");
+      user.role = role;
+    }
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+    if (typeof isActive === "boolean") {
+      user.isActive = isActive;
+    }
+
+    await user.save();
+    res.json({ user: { id: user._id, name: user.name, email: user.email, role: user.role, isActive: user.isActive } });
+  })
+);
+
+router.delete(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) throw new ApiError(404, "User not found");
+    res.json({ message: "User deleted" });
   })
 );
 

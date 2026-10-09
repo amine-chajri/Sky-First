@@ -2,9 +2,11 @@ import { Router } from "express";
 import { Contact, createContact } from "../models/Contact.js";
 import { validate, asyncHandler, ApiError } from "../middleware/index.js";
 import { contactSchema } from "../schemas/validation.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { requireAuth, requireActiveUser, requireRole } from "../middleware/auth.js";
 
 const router = Router();
+
+const staffAuth = [requireAuth, requireActiveUser, requireRole("admin", "waiter")];
 
 router.post(
   "/",
@@ -20,8 +22,7 @@ router.post(
 
 router.get(
   "/",
-  requireAuth,
-  requireRole("admin", "waiter"),
+  ...staffAuth,
   asyncHandler(async (_req, res) => {
     const messages = await Contact.find().sort({ createdAt: -1 }).lean();
     res.json({ messages });
@@ -30,8 +31,7 @@ router.get(
 
 router.patch(
   "/:id/status",
-  requireAuth,
-  requireRole("admin", "waiter"),
+  ...staffAuth,
   asyncHandler(async (req, res) => {
     const { status } = req.body ?? {};
     if (!["new", "read", "replied"].includes(status)) {
