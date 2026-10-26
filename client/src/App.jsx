@@ -14,10 +14,9 @@ import { Login } from "./components/Login";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { WaiterDashboard } from "./components/WaiterDashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-
-function PublicLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <ReservationModalProvider>
+import FloatingNavDemo from "./components/floating-navbar-demo";
+function PublicLayout({ children }) {
+    return (<ReservationModalProvider>
       <div className="relative min-h-screen overflow-x-hidden bg-night-950">
         <Seo />
         <Navbar />
@@ -25,59 +24,38 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
         <Footer />
         <ReservationModal />
       </div>
-    </ReservationModalProvider>
-  );
+    </ReservationModalProvider>);
 }
-
-function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <ReservationModalProvider>
+function ProtectedLayout({ children }) {
+    return (<ReservationModalProvider>
       <div className="min-h-screen bg-night-950">
         <Navbar />
         <main>{children}</main>
       </div>
-    </ReservationModalProvider>
-  );
+    </ReservationModalProvider>);
 }
-
 export default function App() {
-  return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <PublicLayout>
+    return (<Routes>
+      <Route path="/" element={<PublicLayout>
             <Hero />
             <HighlightsMarquee />
             <MenuSection />
             <LocationSection />
             <ReviewsSection />
             <ContactSection />
-          </PublicLayout>
-        }
-      />
-      <Route path="/login" element={<Login />} />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
+          </PublicLayout>}/>
+      <Route path="/login" element={<Login />}/>
+      <Route path="/floating-navbar-demo" element={<FloatingNavDemo />}/>
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}>
             <ProtectedLayout>
               <AdminDashboard />
             </ProtectedLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/waiter"
-        element={
-          <ProtectedRoute allowedRoles={["waiter"]}>
+          </ProtectedRoute>}/>
+      <Route path="/waiter" element={<ProtectedRoute allowedRoles={["waiter"]}>
             <ProtectedLayout>
               <WaiterDashboard />
             </ProtectedLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
+          </ProtectedRoute>}/>
+      <Route path="*" element={<Navigate to="/" replace/>}/>
+    </Routes>);
 }

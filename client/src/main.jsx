@@ -5,19 +5,16 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
 import App from "./App";
 import "./index.css";
-
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      retry: 2,
-      refetchOnWindowFocus: false,
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5,
+            retry: 2,
+            refetchOnWindowFocus: false,
+        },
     },
-  },
 });
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+ReactDOM.createRoot(document.getElementById("root")).render(<React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
@@ -25,5 +22,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
-  </React.StrictMode>
-);
+  </React.StrictMode>);

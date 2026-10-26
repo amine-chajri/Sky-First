@@ -1,9 +1,7 @@
 import { Clock, Instagram, MapPin, Phone, Star } from "lucide-react";
 import { BUSINESS } from "../data/business";
-
 export function Footer() {
-  return (
-    <footer className="border-t border-white/10 bg-night-900/70">
+    return (<footer className="border-t border-white/10 bg-night-900/70">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-4">
           {/* Brand */}
@@ -25,7 +23,7 @@ export function Footer() {
               a panoramic view.
             </p>
             <div className="mt-4 flex items-center gap-1.5 text-sm text-cream/60">
-              <Star className="h-4 w-4 fill-gold-400 text-gold-400" />
+              <Star className="h-4 w-4 fill-gold-400 text-gold-400"/>
               {BUSINESS.rating} · {BUSINESS.reviewCount} {BUSINESS.reviewProvider}
             </div>
           </div>
@@ -37,24 +35,22 @@ export function Footer() {
             </h4>
             <ul className="mt-4 space-y-2.5 text-sm">
               {[
-                { label: "Menu", href: "#menu" },
-                { label: "Location & Hours", href: "#location" },
-                { label: "Reviews", href: "#reviews" },
-                { label: "Contact", href: "#contact" },
-              ].map((l) => (
-                <li key={l.href}>
+            { label: "Menu", href: "#menu" },
+            { label: "Location & Hours", href: "#location" },
+            { label: "Reviews", href: "#reviews" },
+            { label: "Contact", href: "#contact" },
+        ].map((l) => (<li key={l.href}>
                   <a href={l.href} className="text-cream/65 transition-colors hover:text-gold-300">
                     {l.label}
                   </a>
-                </li>
-              ))}
+                </li>))}
             </ul>
           </div>
 
           {/* Hours */}
           <div>
             <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-cream/40">
-              <Clock className="h-4 w-4" /> Hours
+              <Clock className="h-4 w-4"/> Hours
             </h4>
             <ul className="mt-4 space-y-2.5 text-sm text-cream/65">
               <li className="flex justify-between gap-4">
@@ -75,31 +71,20 @@ export function Footer() {
             </h4>
             <ul className="mt-4 space-y-2.5 text-sm text-cream/65">
               <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold-400" />
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold-400"/>
                 {BUSINESS.address}
               </li>
               <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0 text-gold-400" />
+                <Phone className="h-4 w-4 shrink-0 text-gold-400"/>
                 <a href={BUSINESS.phoneHref} className="transition-colors hover:text-gold-300">
                   {BUSINESS.phone}
                 </a>
               </li>
             </ul>
             <div className="mt-4 flex gap-2">
-              {["Instagram", "Facebook", "TikTok"].map((s) => (
-                <a
-                  key={s}
-                  href="#top"
-                  aria-label={s}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-cream/60 transition-all hover:border-gold-400/60 hover:text-gold-300"
-                >
-                  {s === "Instagram" ? (
-                    <Instagram className="h-4 w-4" />
-                  ) : (
-                    <span className="text-xs font-bold">{s[0]}</span>
-                  )}
-                </a>
-              ))}
+              {["Instagram", "Facebook", "TikTok"].map((s) => (<a key={s} href="#top" aria-label={s} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-cream/60 transition-all hover:border-gold-400/60 hover:text-gold-300">
+                  {s === "Instagram" ? (<Instagram className="h-4 w-4"/>) : (<span className="text-xs font-bold">{s[0]}</span>)}
+                </a>))}
             </div>
           </div>
         </div>
@@ -113,6 +98,5 @@ export function Footer() {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
 }
