@@ -4,6 +4,7 @@ import { format, parseISO } from "date-fns";
 import { Loader2, Calendar, Clock, Users, MapPin, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { api, extractApiError } from "../lib/api";
+import { TableFloorPlan } from "./TableFloorPlan";
 const SEATING_LABELS = {
     "panoramic-rooftop": "Panoramic Rooftop",
     "indoor-lounge": "Indoor Lounge",
@@ -77,7 +78,7 @@ export function WaiterDashboard() {
     const [selectedStatus, setSelectedStatus] = useState("all");
     const [expandedReservation, setExpandedReservation] = useState(null);
     const [expandedMessage, setExpandedMessage] = useState(null);
-    const [activeTab, setActiveTab] = useState("reservations");
+    const [activeTab, setActiveTab] = useState("floorplan");
     const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
         queryKey: ["waiter-reservations", selectedDate, selectedStatus],
         queryFn: () => fetchReservations({
@@ -135,6 +136,14 @@ export function WaiterDashboard() {
 
         <div className="bg-night-900/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
           <div className="flex border-b border-white/10">
+            <button onClick={() => setActiveTab("floorplan")} className={`flex-1 py-4 px-4 text-center font-medium transition-colors ${activeTab === "floorplan"
+            ? "text-gold-300 border-b-2 border-gold-400 bg-white/5"
+            : "text-cream/50 hover:text-cream"}`}>
+              <span className="flex items-center justify-center gap-2">
+                <Users className="h-5 w-5"/>
+                Floor Plan
+              </span>
+            </button>
             <button onClick={() => setActiveTab("reservations")} className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${activeTab === "reservations"
             ? "text-gold-300 border-b-2 border-gold-400 bg-white/5"
             : "text-cream/50 hover:text-cream"}`}>
@@ -154,7 +163,7 @@ export function WaiterDashboard() {
           </div>
 
           <div className="p-6">
-            {activeTab === "reservations" ? (<>
+            {activeTab === "floorplan" ? <TableFloorPlan role="waiter" user={user} /> : activeTab === "reservations" ? (<>
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-cream/50"/>

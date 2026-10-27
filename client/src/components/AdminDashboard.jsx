@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, Loader2, X } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { api, extractApiError } from "../lib/api";
+import { TableFloorPlan } from "./TableFloorPlan";
 const MENU_CATEGORIES = [
     "breakfast",
     "mains",
@@ -178,6 +179,8 @@ export function AdminDashboard() {
             </button>
           </div>
         </div>
+
+        <TableFloorPlan role="admin" user={user} />
 
         {isLoading ? (<div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gold-400"/>
