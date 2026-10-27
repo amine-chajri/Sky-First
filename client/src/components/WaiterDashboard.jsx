@@ -315,6 +315,21 @@ function MessageCard({ message, isExpanded, onToggle, onStatusChange, isUpdating
       </button>
 
       {isExpanded && (<div className="border-t border-white/10 p-4 space-y-4">
+          {message.order && (<div className="rounded-xl border border-gold-400/20 bg-gold-400/5 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-medium text-cream">Order {message.order.orderId}</p>
+              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-300">{message.order.status}</span>
+            </div>
+            <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+              <p className="text-cream/60">Table: <span className="text-cream">{message.order.tableNumber}</span></p>
+              <p className="text-cream/60">Dish: <span className="text-cream">{message.order.dishName}</span></p>
+              <p className="text-cream/60">Quantity: <span className="text-cream">{message.order.quantity}</span></p>
+              <p className="text-cream/60">Received: <span className="text-cream">{message.order.timestamp}</span></p>
+            </div>
+            <p className="mt-3 text-xs font-medium uppercase tracking-wide text-cream/45">Special instructions</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm text-cream">{message.order.specialInstructions || "None"}</p>
+          </div>)}
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-xs text-cream/50 mb-1">Email</p>

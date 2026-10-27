@@ -9,6 +9,7 @@ const contactSchema = new mongoose.Schema(
     phone: { type: String, default: "" },
     subject: { type: String, default: "" },
     message: { type: String, required: true },
+    order: { type: mongoose.Schema.Types.Mixed, default: undefined },
     status: { type: String, enum: CONTACT_STATUSES, default: "new" },
   },
   { timestamps: true }

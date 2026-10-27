@@ -46,6 +46,15 @@ export const contactSchema = z.object({
   phone: z.string().trim().max(20).optional().default(""),
   subject: z.string().trim().min(2).max(120),
   message: z.string().trim().min(10).max(2000),
+  order: z.object({
+    orderId: z.string().trim().min(1).max(40),
+    tableNumber: z.string().trim().min(1).max(40),
+    dishName: z.string().trim().min(1).max(120),
+    quantity: z.number().int().min(1).max(20),
+    specialInstructions: z.string().trim().max(1000).default(""),
+    status: z.literal("Pending"),
+    timestamp: z.string().trim().min(1).max(40),
+  }).optional(),
 });
 
 export const availabilitySchema = z.object({
