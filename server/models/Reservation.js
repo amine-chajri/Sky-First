@@ -17,6 +17,7 @@ const reservationSchema = new mongoose.Schema(
     date: { type: String, required: true }, // YYYY-MM-DD
     timeSlot: { type: String, required: true }, // HH:mm
     guests: { type: Number, required: true, min: 1 },
+    tableNumber: { type: Number, default: null },
     seatingPreference: {
       type: String,
       enum: SEATING_PREFERENCES,

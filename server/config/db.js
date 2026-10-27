@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { config } from "./index.js";
 import { MenuItem } from "../models/MenuItem.js";
 import { User } from "../models/User.js";
+import { ensureDefaultTables } from "../models/Table.js";
 import { seedMenuItems } from "../seed/data.js";
 
 export async function connectDB() {
@@ -16,6 +17,8 @@ export async function connectDB() {
     );
     console.log(`[db] Seeded ${seedMenuItems.length} menu items`);
   }
+
+  await ensureDefaultTables();
 
   const userCount = await User.countDocuments();
   if (userCount === 0) {

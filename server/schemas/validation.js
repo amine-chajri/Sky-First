@@ -17,6 +17,7 @@ export const reservationSchema = z
       .regex(/^[+0-9 ()-]+$/, "Invalid phone format"),
     email: z.string().trim().email("Valid email required").max(120),
     specialRequests: z.string().trim().max(500).default(""),
+    tableNumber: z.coerce.number().int().min(1).optional(),
   })
   .superRefine((data, ctx) => {
     const today = new Date();
@@ -50,7 +51,7 @@ export const contactSchema = z.object({
     orderId: z.string().trim().min(1).max(40),
     tableNumber: z.string().trim().min(1).max(40),
     dishName: z.string().trim().min(1).max(120),
-    quantity: z.number().int().min(1).max(20),
+    quantity: z.coerce.number().int().min(1).max(20),
     specialInstructions: z.string().trim().max(1000).default(""),
     status: z.literal("Pending"),
     timestamp: z.string().trim().min(1).max(40),

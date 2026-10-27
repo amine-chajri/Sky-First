@@ -11,6 +11,7 @@ import contactRoutes from "./routes/contact.js";
 import healthRoutes from "./routes/health.js";
 import authRoutes from "./routes/auth.js";
 import usersRoutes from "./routes/users.js";
+import tablesRoutes from "./routes/tables.js";
 
 export function createApp() {
   const app = express();
@@ -33,6 +34,7 @@ export function createApp() {
   app.use("/api/contact", contactRoutes);
   app.use("/api/auth", authRoutes);
   app.use("/api/users", usersRoutes);
+  app.use("/api/tables", tablesRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
