@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarCheck, ChevronRight, Clock, MapPin, Star, UtensilsCrossed, } from "lucide-react";
 import { BUSINESS, currentOpenStatus, isOpenNow } from "../data/business";
 import { useReservationModal } from "./reservation/ReservationModalContext";
-const heroImage = "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2000&q=80";
+import GhostFibers from "./GhostFibers";
 const fadeUp = {
     hidden: { opacity: 0, y: 28 },
     show: (i) => ({
@@ -25,16 +25,54 @@ export function Hero() {
     useEffect(() => {
         document.title = `${BUSINESS.name} — ${BUSINESS.tagline} | Agdal, Rabat`;
     }, []);
-    return (<section ref={ref} id="top" className="relative flex min-h-[100svh] items-center overflow-hidden">
-      {/* Parallax background */}
-      <motion.div style={{ y: bgY }} className="absolute inset-0 -z-10">
-        <img src={heroImage} alt="Panoramic rooftop dining at Sky First, Agdal Rabat" className="h-[130%] w-full object-cover" loading="eager"/>
-        <div className="absolute inset-0 bg-gradient-to-b from-night-950/85 via-night-950/55 to-night-950"/>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(7,7,12,0.7)_100%)]"/>
+    return (<section ref={ref} id="top" className="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-night-950">
+      {/* Dynamic background */}
+      <motion.div style={{ y: bgY }} className="absolute inset-0">
+        <div className="absolute inset-0">
+          <GhostFibers
+            glowColor="#c07d20"
+            layers={2}
+            twist={0.7}
+            threads={120}
+            fiberStyle="lines"
+            depthOfField={0.45}
+            hoverEffect="focus"
+            intro
+            mouseInteraction
+            lineColor="#ecfdf5"
+            secondaryColor="#ebb540"
+            gradient="depth"
+            waves={1.5}
+            volume={1.1}
+            spread={1}
+            scale={1}
+            rotation={18}
+            perspective={0.65}
+            density={1}
+            thickness={1}
+            tips={0}
+            foldGlow={2}
+            speed={0.5}
+            flow={0.4}
+            rollSpeed={0.15}
+            focusDepth={0}
+            particles={0.25}
+            sparkle={0.2}
+            glow={0.8}
+            brightness={1}
+            vignette={0.3}
+            grain={0.06}
+            mouseStrength={1}
+            pulseOnClick
+            lightMode={false}
+          />
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-night-950/25 via-transparent to-night-950/75"/>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(7,7,12,0.55)_100%)]"/>
       </motion.div>
 
       {/* Content */}
-      <motion.div style={{ y: contentY, opacity: contentOpacity }} className="mx-auto w-full max-w-7xl px-4 pb-24 pt-32 sm:px-6 lg:px-8">
+      <motion.div style={{ y: contentY, opacity: contentOpacity }} className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-24 pt-32 sm:px-6 lg:px-8">
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold-300 backdrop-blur-md">
             <MapPin className="h-3.5 w-3.5"/>
