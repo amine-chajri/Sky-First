@@ -187,9 +187,9 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        <TableFloorPlan role="admin" user={user} />
-
         <WaiterAccountsTable />
+
+        <TableFloorPlan role="admin" user={user} />
 
         {isLoading ? (<div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gold-400"/>
