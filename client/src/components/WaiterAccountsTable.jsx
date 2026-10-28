@@ -227,7 +227,7 @@ export function WaiterAccountsTable() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <section className="mb-8 rounded-2xl border border-white/10 bg-night-900/80 backdrop-blur-xl" aria-label="Waiter accounts">
+    <section className="mb-8 overflow-hidden rounded-2xl border border-white/10 bg-night-900/80 pb-3 backdrop-blur-xl" aria-label="Waiter accounts">
       <div className="flex flex-col gap-4 border-b border-white/10 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-400">Team</p>
@@ -272,7 +272,7 @@ export function WaiterAccountsTable() {
             </TableRow>
           </TableHeader>
 
-          <TableBody className="[&_tr]:border-white/5 [&_tr:hover]:bg-white/5">
+          <TableBody className="[&_tr]:border-white/5">
             {isLoading ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={6} className="py-12 text-center">
@@ -290,22 +290,38 @@ export function WaiterAccountsTable() {
                 const isSelected = selectedIds.includes(waiter.id);
                 const status = waiter.shiftStatus || "off-shift";
                 return (
-                  <TableRow key={waiter.id} data-state={isSelected ? "selected" : undefined}>
+                  <TableRow
+                    key={waiter.id}
+                    aria-selected={isSelected}
+                    className={
+                      isSelected
+                        ? "bg-gold-400 text-night-950 hover:bg-gold-300"
+                        : "hover:bg-white/5"
+                    }
+                  >
                     <TableCell>
                       <Checkbox
                         checked={isSelected}
                         onCheckedChange={() => toggleOne(waiter.id)}
                         aria-label={`Select ${waiter.name}`}
+                        className={isSelected ? "border-night-950/40" : undefined}
                       />
                     </TableCell>
-                    <TableCell className="font-medium text-cream">{waiter.name}</TableCell>
-                    <TableCell className="text-cream/70">{waiter.email}</TableCell>
+                    <TableCell className="font-medium">{waiter.name}</TableCell>
+                    <TableCell className={isSelected ? "text-night-950/75" : "text-cream/70"}>{waiter.email}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={SHIFT_STATUS_STYLES[status] || SHIFT_STATUS_STYLES["off-shift"]}>
+                      <Badge
+                        variant="outline"
+                        className={
+                          isSelected
+                            ? "border-night-950/30 bg-night-950/15 text-night-950"
+                            : SHIFT_STATUS_STYLES[status] || SHIFT_STATUS_STYLES["off-shift"]
+                        }
+                      >
                         {SHIFT_STATUS_LABELS[status] || "Off Shift"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-cream/60">
+                    <TableCell className={isSelected ? "text-night-950/75" : "text-cream/60"}>
                       <span className="inline-flex items-center gap-1.5">
                         <CalendarDays className="h-3.5 w-3.5" />
                         {formatCreatedAt(waiter.createdAt)}
@@ -316,7 +332,11 @@ export function WaiterAccountsTable() {
                         <button
                           type="button"
                           onClick={() => openDialog(waiter)}
-                          className="rounded-lg p-2 text-cream/50 transition-colors hover:bg-white/10 hover:text-cream"
+                          className={
+                            isSelected
+                              ? "rounded-lg p-2 text-night-950/70 transition-colors hover:bg-night-950/10 hover:text-night-950"
+                              : "rounded-lg p-2 text-cream/50 transition-colors hover:bg-white/10 hover:text-cream"
+                          }
                           aria-label={`Edit ${waiter.name}`}
                         >
                           <Pencil className="h-4 w-4" />
@@ -325,7 +345,11 @@ export function WaiterAccountsTable() {
                           type="button"
                           onClick={() => handleDelete(waiter)}
                           disabled={deleteMutation.isPending}
-                          className="rounded-lg p-2 text-cream/50 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+                          className={
+                            isSelected
+                              ? "rounded-lg p-2 text-night-950/70 transition-colors hover:bg-red-500/20 hover:text-red-950 disabled:opacity-50"
+                              : "rounded-lg p-2 text-cream/50 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+                          }
                           aria-label={`Delete ${waiter.name}`}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -340,12 +364,12 @@ export function WaiterAccountsTable() {
 
           <TableFooter className="sticky bottom-0 z-10 border-white/10 bg-night-900 [&_td]:text-cream/60">
             <TableRow className="border-0 hover:bg-transparent">
-              <TableCell colSpan={2} className="font-medium">
+              <TableCell colSpan={2} className="pt-4 pb-2 font-medium">
                 Total waiters: {waiters.length}
               </TableCell>
-              <TableCell>{onShiftCount} on shift</TableCell>
-              <TableCell>{dayOffCount} day off</TableCell>
-              <TableCell colSpan={2} className="text-right">
+              <TableCell className="pt-4 pb-2">{onShiftCount} on shift</TableCell>
+              <TableCell className="pt-4 pb-2">{dayOffCount} day off</TableCell>
+              <TableCell colSpan={2} className="pt-4 pb-2 text-right">
                 {selectedIds.length > 0 ? `${selectedIds.length} selected` : "Ready for service"}
               </TableCell>
             </TableRow>
