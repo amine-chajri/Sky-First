@@ -5,6 +5,7 @@ import { Plus, Edit, Trash2, Loader2, X } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { api, extractApiError } from "../lib/api";
 import { TableFloorPlan } from "./TableFloorPlan";
+import { WaiterAccountsTable } from "./WaiterAccountsTable";
 const MENU_CATEGORIES = [
     "breakfast",
     "mains",
@@ -187,6 +188,8 @@ export function AdminDashboard() {
         </div>
 
         <TableFloorPlan role="admin" user={user} />
+
+        <WaiterAccountsTable />
 
         {isLoading ? (<div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gold-400"/>

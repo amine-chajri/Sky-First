@@ -28,6 +28,7 @@ export async function connectDB() {
         email: "admin@skyfirst.ma",
         password: await bcrypt.hash("admin123", 10),
         role: "admin",
+        shiftStatus: "on-shift",
         isActive: true,
       },
       {
@@ -35,6 +36,7 @@ export async function connectDB() {
         email: "waiter@skyfirst.ma",
         password: await bcrypt.hash("waiter123", 10),
         role: "waiter",
+        shiftStatus: "on-shift",
         isActive: true,
       },
     ]);
