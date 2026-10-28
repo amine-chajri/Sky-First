@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, Loader2, X } from "lucide-react";
 import { useAuth } from "../lib/auth";
@@ -60,6 +61,7 @@ const emptyForm = {
 };
 export function AdminDashboard() {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -148,6 +150,10 @@ export function AdminDashboard() {
             createMutation.mutate(formData);
         }
     };
+    const handleLogout = () => {
+        logout();
+        navigate("/login", { replace: true });
+    };
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to delete this item?")) {
             deleteMutation.mutate(id);
@@ -170,7 +176,7 @@ export function AdminDashboard() {
             <span className="text-cream/60 hidden sm:block">
               Signed in as <span className="font-medium text-gold-300">{user?.name}</span>
             </span>
-            <button onClick={logout} className="btn-outline">
+            <button type="button" onClick={handleLogout} className="btn-outline">
               Logout
             </button>
             <button onClick={() => openModal()} className="btn-gold">

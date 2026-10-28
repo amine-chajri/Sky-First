@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Loader2, Calendar, Clock, Users, MapPin, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
@@ -73,6 +74,7 @@ function formatTime(timeStr) {
 }
 export function WaiterDashboard() {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [selectedDate, setSelectedDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
     const [selectedStatus, setSelectedStatus] = useState("all");
@@ -108,6 +110,10 @@ export function WaiterDashboard() {
             alert(extractApiError(err));
         },
     });
+    const handleLogout = () => {
+        logout();
+        navigate("/login", { replace: true });
+    };
     const handleStatusChange = (id, newStatus) => {
         if (activeTab === "reservations") {
             updateReservationMutation.mutate({ id, status: newStatus });
@@ -128,7 +134,7 @@ export function WaiterDashboard() {
             <span className="text-cream/60 hidden sm:block">
               Signed in as <span className="font-medium text-gold-300">{user?.name}</span>
             </span>
-            <button onClick={logout} className="btn-outline">
+            <button type="button" onClick={handleLogout} className="btn-outline">
               Logout
             </button>
           </div>
