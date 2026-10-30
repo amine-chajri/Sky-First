@@ -6,6 +6,7 @@ import { Loader2, Calendar, Clock, Users, MapPin, ChevronDown, ChevronUp, Messag
 import { useAuth } from "../lib/auth";
 import { api, extractApiError } from "../lib/api";
 import { TableFloorPlan } from "./TableFloorPlan";
+import { ORDER_STAGES, normalizeOrderStatus, updateOrderStatus } from "../lib/orderTracking";
 const SEATING_LABELS = {
     "panoramic-rooftop": "Panoramic Rooftop",
     "indoor-lounge": "Indoor Lounge",
@@ -298,6 +299,19 @@ function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, is
     </div>);
 }
 function MessageCard({ message, isExpanded, onToggle, onStatusChange, isUpdating, }) {
+    const [orderStage, setOrderStage] = useState(() => normalizeOrderStatus(message.order?.status));
+    const [orderSyncError, setOrderSyncError] = useState("");
+    const activeStage = ORDER_STAGES.find((stage) => stage.id === orderStage) ?? ORDER_STAGES[0];
+    const handleOrderStage = async (nextStage) => {
+        if (!message.order)
+            return;
+        setOrderStage(nextStage);
+        setOrderSyncError("");
+        const result = await updateOrderStatus(message.order.orderId, nextStage);
+        if (!result.synced) {
+            setOrderSyncError("Saved on this device — the order API did not accept the update.");
+        }
+    };
     return (<div className="bg-night-950 border border-white/10 rounded-xl overflow-hidden">
       <button onClick={onToggle} className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors text-left">
         <div className="flex items-center gap-4">
@@ -324,7 +338,7 @@ function MessageCard({ message, isExpanded, onToggle, onStatusChange, isUpdating
           {message.order && (<div className="rounded-xl border border-gold-400/20 bg-gold-400/5 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-medium text-cream">Order {message.order.orderId}</p>
-              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-300">{message.order.status}</span>
+              <span className="rounded-full border border-gold-400/30 bg-gold-400/10 px-2.5 py-1 text-xs font-medium text-gold-300">{activeStage.label}</span>
             </div>
             <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
               <p className="text-cream/60">Table: <span className="text-cream">{message.order.tableNumber}</span></p>
@@ -334,6 +348,17 @@ function MessageCard({ message, isExpanded, onToggle, onStatusChange, isUpdating
             </div>
             <p className="mt-3 text-xs font-medium uppercase tracking-wide text-cream/45">Special instructions</p>
             <p className="mt-1 whitespace-pre-wrap text-sm text-cream">{message.order.specialInstructions || "None"}</p>
+            <div className="mt-4 border-t border-gold-400/15 pt-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-cream/45">Update kitchen status</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {ORDER_STAGES.map((stage) => (<button key={stage.id} type="button" onClick={() => handleOrderStage(stage.id)} disabled={stage.id === orderStage} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${stage.id === orderStage
+                ? "bg-gold-500/20 text-gold-300 border border-gold-400/30 cursor-default"
+                : "bg-white/5 text-cream/70 hover:bg-white/10"}`}>
+                    {stage.label}
+                  </button>))}
+              </div>
+              {orderSyncError && (<p className="mt-2 text-xs text-amber-300/80">{orderSyncError}</p>)}
+            </div>
           </div>)}
 
           <div className="grid gap-4 sm:grid-cols-2">

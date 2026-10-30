@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Minus, Plus, Search, SlidersHorizontal, Star, X } from "lucide-react";
 import { CATEGORY_LABELS } from "../data/business";
 import { useMenu } from "../hooks/useMenu";
 import { extractApiError, submitContact } from "../lib/api";
+import { saveOrder } from "../lib/orderTracking";
 const CATEGORIES = Object.keys(CATEGORY_LABELS);
 export function MenuSection() {
     const { data: items, isLoading, error } = useMenu();
+    const navigate = useNavigate();
     const [activeCategory, setActiveCategory] = useState("all");
     const [query, setQuery] = useState("");
     const [vegetarianOnly, setVegetarianOnly] = useState(false);
@@ -137,7 +140,9 @@ export function MenuSection() {
                   message: `New customer order\nOrder ID: ${order.orderId}\nTable: ${order.tableNumber}\nDish: ${order.dishName}\nQuantity: ${order.quantity}\nSpecial instructions: ${order.specialInstructions || "None"}`,
                   order,
                 });
+                saveOrder(order);
                 setSelectedDish(null);
+                navigate(`/order/${order.orderId}`);
               } catch (error) {
                 setOrderError(extractApiError(error));
               } finally {

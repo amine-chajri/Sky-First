@@ -11,6 +11,7 @@ import { Footer } from "./components/Footer";
 import { ReservationModal } from "./components/reservation/ReservationModal";
 import { ReservationModalProvider } from "./components/reservation/ReservationModalContext";
 import { Login } from "./components/Login";
+import { OrderStatusTracker } from "./components/OrderStatusTracker";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { WaiterDashboard } from "./components/WaiterDashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -45,6 +46,9 @@ export default function App() {
             <ContactSection />
           </PublicLayout>}/>
       <Route path="/login" element={<Login />}/>
+      <Route path="/order/:orderId" element={<PublicLayout>
+            <OrderStatusTracker />
+          </PublicLayout>}/>
       <Route path="/floating-navbar-demo" element={<FloatingNavDemo />}/>
       <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}>
             <ProtectedLayout>
