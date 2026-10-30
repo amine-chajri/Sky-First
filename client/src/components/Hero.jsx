@@ -72,7 +72,7 @@ export function Hero() {
       </motion.div>
 
       {/* Content */}
-      <motion.div style={{ y: contentY, opacity: contentOpacity }} className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-24 pt-32 sm:px-6 lg:px-8">
+      <motion.div style={{ y: contentY, opacity: contentOpacity }} className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 pb-24 pt-32 text-center sm:px-6 lg:px-8">
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold-300 backdrop-blur-md">
             <MapPin className="h-3.5 w-3.5"/>
@@ -80,18 +80,18 @@ export function Hero() {
           </div>
         </motion.div>
 
-        <motion.h1 custom={1} variants={fadeUp} initial="hidden" animate="show" className="max-w-4xl font-display text-4xl font-semibold leading-[1.1] text-cream sm:text-6xl lg:text-7xl">
+        <motion.h1 custom={1} variants={fadeUp} initial="hidden" animate="show" className="mx-auto max-w-4xl font-display text-4xl font-semibold leading-[1.1] text-cream sm:text-6xl lg:text-7xl">
           Elevate Your Dining Experience at{" "}
           <span className="gold-text">Agdal&rsquo;s Premier Rooftop Lounge</span>
         </motion.h1>
 
-        <motion.p custom={2} variants={fadeUp} initial="hidden" animate="show" className="mt-6 max-w-2xl text-base leading-relaxed text-cream/75 sm:text-lg">
+        <motion.p custom={2} variants={fadeUp} initial="hidden" animate="show" className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-cream/75 sm:text-lg">
           Continental breakfast at dawn, Italian &amp; international specialties at dusk —
           all framed by a panoramic view of Rabat. Family-friendly, drive-through friendly,
           unforgettable.
         </motion.p>
 
-        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show" className="mt-9 flex flex-wrap items-center gap-4">
+        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show" className="mt-9 flex flex-wrap items-center justify-center gap-4">
           <button onClick={openReservation} className="btn-gold text-base">
             <CalendarCheck className="h-5 w-5"/>
             Reserve a Table
@@ -103,7 +103,7 @@ export function Hero() {
         </motion.div>
 
         {/* Live info bar */}
-        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show" className="mt-12 grid max-w-3xl grid-cols-1 gap-px overflow-hidden rounded-2xl glass shadow-glass sm:grid-cols-3">
+        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show" className="mx-auto mt-12 grid w-full max-w-3xl grid-cols-1 gap-px overflow-hidden rounded-2xl glass shadow-glass sm:grid-cols-3">
           <InfoCell icon={<Clock className="h-4 w-4"/>} label={isOpenNow() ? "Open Status" : "Status"} value={currentOpenStatus()} accent={isOpenNow() ? "text-emerald-300" : "text-red-300"}/>
           <InfoCell icon={<Star className="h-4 w-4 fill-gold-400 text-gold-400"/>} label="Google Rating" value={`⭐ ${BUSINESS.rating} (${BUSINESS.reviewCount} Reviews)`}/>
           <InfoCell icon={<UtensilsCrossed className="h-4 w-4"/>} label="Price Range" value={BUSINESS.priceRange}/>
@@ -119,7 +119,7 @@ export function Hero() {
     </section>);
 }
 function InfoCell({ icon, label, value, accent, }) {
-    return (<div className="flex items-center gap-3 bg-night-900/40 px-5 py-4">
+    return (<div className="flex items-center gap-3 bg-night-900/40 px-5 py-4 text-left">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold-400/15 text-gold-300">
         {icon}
       </span>
