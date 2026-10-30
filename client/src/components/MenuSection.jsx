@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Minus, Plus, Search, SlidersHorizontal, Star, X } from "lucide-react";
 import { CATEGORY_LABELS } from "../data/business";
 import { useMenu } from "../hooks/useMenu";
+import { BorderBeam } from "./ui/border-beam";
 import { extractApiError, submitContact } from "../lib/api";
 import { saveOrder } from "../lib/orderTracking";
 const CATEGORIES = Object.keys(CATEGORY_LABELS);
@@ -187,7 +188,7 @@ function FilterChip({ active, onClick, children, }) {
     </button>);
 }
 function MenuItemCard({ item, onOrder }) {
-    return (<motion.article layout initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.3 }} className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-night-800/50 transition-all duration-300 hover:-translate-y-1 hover:border-gold-400/40 hover:shadow-gold-glow">
+    return (<motion.article layout initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.3 }} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-night-800/50 transition-all duration-300 hover:-translate-y-1 hover:border-gold-400/40 hover:shadow-gold-glow">
       <div className="relative h-48 overflow-hidden">
         <img src={item.image} alt={item.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"/>
         <div className="absolute inset-0 bg-gradient-to-t from-night-900/80 to-transparent"/>
@@ -220,5 +221,6 @@ function MenuItemCard({ item, onOrder }) {
           </button>
         </div>
       </div>
+      <BorderBeam className="z-10" colorFrom="#f5dd8f" colorTo="#bc781e" size={180} duration={9} borderWidth={1.5}/>
     </motion.article>);
 }

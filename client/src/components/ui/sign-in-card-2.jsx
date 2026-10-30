@@ -394,29 +394,6 @@ export function SignInCard({ onSubmit, isLoading = false, error = null }) {
                     </AnimatePresence>
                   </div>
                 </motion.button>
-
-                {/* Divider */}
-                <div className="relative mt-2 flex items-center">
-                  <div className="grow border-t border-white/10" />
-                  <motion.span
-                    className="mx-3 text-[11px] uppercase tracking-[0.2em] text-cream/35"
-                    initial={{ opacity: 0.7 }}
-                    animate={{ opacity: [0.7, 0.9, 0.7] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    Staff access
-                  </motion.span>
-                  <div className="grow border-t border-white/10" />
-                </div>
-
-                {/* Demo credentials */}
-                <div className="space-y-1 rounded-lg border border-white/10 bg-white/5 p-3 text-center">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-gold-300/80">
-                    Demo credentials
-                  </p>
-                  <p className="font-mono text-[11px] text-cream/50">Admin: admin@skyfirst.ma / admin123</p>
-                  <p className="font-mono text-[11px] text-cream/50">Waiter: waiter@skyfirst.ma / waiter123</p>
-                </div>
               </form>
             </div>
           </div>

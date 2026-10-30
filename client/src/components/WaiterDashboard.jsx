@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { Loader2, Calendar, Clock, Users, MapPin, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
+import { Loader2, Calendar, Clock, Users, MapPin, ChevronDown, ChevronUp, MessageSquare, Trash2 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { api, extractApiError } from "../lib/api";
 import { TableFloorPlan } from "./TableFloorPlan";
@@ -53,6 +53,24 @@ async function updateContactStatus(id, status) {
     const { data } = await api.patch(`/contact/${id}/status`, { status });
     return data.message;
 }
+const DELETED_MESSAGES_KEY = "skyfirst_deleted_messages";
+const DELETED_RESERVATIONS_KEY = "skyfirst_deleted_reservations";
+function readStoredIds(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    }
+    catch {
+        return [];
+    }
+}
+function readDeletedMessageIds() {
+    return readStoredIds(DELETED_MESSAGES_KEY);
+}
+function readDeletedReservationIds() {
+    return readStoredIds(DELETED_RESERVATIONS_KEY);
+}
 function formatDate(dateStr) {
     try {
         return format(parseISO(dateStr), "EEEE, MMMM d, yyyy");
@@ -82,6 +100,11 @@ export function WaiterDashboard() {
     const [expandedReservation, setExpandedReservation] = useState(null);
     const [expandedMessage, setExpandedMessage] = useState(null);
     const [activeTab, setActiveTab] = useState("floorplan");
+    const [showHandledMessages, setShowHandledMessages] = useState(false);
+    const [deletedMessageIds, setDeletedMessageIds] = useState(readDeletedMessageIds);
+    const [deleteSyncNotice, setDeleteSyncNotice] = useState("");
+    const [deletedReservationIds, setDeletedReservationIds] = useState(readDeletedReservationIds);
+    const [reservationDeleteNotice, setReservationDeleteNotice] = useState("");
     const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
         queryKey: ["waiter-reservations", selectedDate, selectedStatus],
         queryFn: () => fetchReservations({
@@ -97,6 +120,7 @@ export function WaiterDashboard() {
         mutationFn: ({ id, status }) => updateReservationStatus(id, status),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["waiter-reservations"] });
+            setExpandedReservation(null);
         },
         onError: (err) => {
             alert(extractApiError(err));
@@ -106,11 +130,74 @@ export function WaiterDashboard() {
         mutationFn: ({ id, status }) => updateContactStatus(id, status),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["waiter-messages"] });
+            setExpandedMessage(null);
         },
         onError: (err) => {
             alert(extractApiError(err));
         },
     });
+    const deleteMessageMutation = useMutation({
+        mutationFn: async ({ id }) => {
+            setDeletedMessageIds((ids) => {
+                const next = ids.includes(id) ? ids : [...ids, id];
+                localStorage.setItem(DELETED_MESSAGES_KEY, JSON.stringify(next));
+                return next;
+            });
+            setExpandedMessage(null);
+            setDeleteSyncNotice("");
+            try {
+                await api.delete(`/contact/${id}`);
+                return { synced: true };
+            }
+            catch {
+                return { synced: false };
+            }
+        },
+        onSuccess: (result) => {
+            if (!result?.synced) {
+                setDeleteSyncNotice("Removed from this dashboard. The server has no delete endpoint yet, so it may reappear on other devices.");
+            }
+            queryClient.invalidateQueries({ queryKey: ["waiter-messages"] });
+        },
+    });
+    const handleDeleteMessage = (id) => {
+        const target = messages.find((message) => message._id === id);
+        const label = target?.name ? `the message from ${target.name}` : "this message";
+        if (window.confirm(`Delete ${label}? This cannot be undone.`)) {
+            deleteMessageMutation.mutate({ id });
+        }
+    };
+    const deleteReservationMutation = useMutation({
+        mutationFn: async ({ id }) => {
+            setDeletedReservationIds((ids) => {
+                const next = ids.includes(id) ? ids : [...ids, id];
+                localStorage.setItem(DELETED_RESERVATIONS_KEY, JSON.stringify(next));
+                return next;
+            });
+            setExpandedReservation(null);
+            setReservationDeleteNotice("");
+            try {
+                await api.delete(`/reservations/${id}`);
+                return { synced: true };
+            }
+            catch {
+                return { synced: false };
+            }
+        },
+        onSuccess: (result) => {
+            if (!result?.synced) {
+                setReservationDeleteNotice("Removed from this dashboard. The server has no delete endpoint yet, so it may reappear on other devices.");
+            }
+            queryClient.invalidateQueries({ queryKey: ["waiter-reservations"] });
+        },
+    });
+    const handleDeleteReservation = (id) => {
+        const target = reservations.find((reservation) => reservation._id === id);
+        const label = target?.name ? `the reservation for ${target.name}` : "this reservation";
+        if (window.confirm(`Delete ${label}? This cannot be undone.`)) {
+            deleteReservationMutation.mutate({ id });
+        }
+    };
     const handleLogout = () => {
         logout();
         navigate("/login", { replace: true });
@@ -124,6 +211,17 @@ export function WaiterDashboard() {
         }
     };
     const today = format(new Date(), "yyyy-MM-dd");
+    // Reservations and messages leave the queue once staff finish handling them.
+    const keptReservations = reservations.filter((reservation) => !deletedReservationIds.includes(reservation._id));
+    const visibleReservations = selectedStatus === "all"
+        ? keptReservations.filter((reservation) => reservation.status !== "completed" && reservation.status !== "cancelled")
+        : keptReservations;
+    const hiddenReservationCount = keptReservations.length - visibleReservations.length;
+    const keptMessages = messages.filter((message) => !deletedMessageIds.includes(message._id));
+    const handledMessages = keptMessages.filter((message) => message.status === "replied");
+    const visibleMessages = showHandledMessages
+        ? keptMessages
+        : keptMessages.filter((message) => message.status !== "replied");
     return (<div className="min-h-screen bg-night-950 pt-16 pb-12 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -170,6 +268,9 @@ export function WaiterDashboard() {
           </div>
 
           <div className="p-6">
+            {activeTab === "messages" && handledMessages.length > 0 ? (<div className="mb-4 flex items-center justify-end gap-3 text-xs text-cream/50"><span>{handledMessages.length} handled</span><button type="button" onClick={() => setShowHandledMessages((value) => !value)} className="rounded-full border border-white/15 px-3 py-1 text-xs font-medium text-cream/70 transition-colors hover:border-gold-400/50 hover:text-gold-200">{showHandledMessages ? "Hide handled" : "Show handled"}</button></div>) : null}
+            {activeTab === "reservations" && reservationDeleteNotice ? (<p className="mb-4 rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{reservationDeleteNotice}</p>) : null}
+            {activeTab === "messages" && deleteSyncNotice ? (<p className="mb-4 rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{deleteSyncNotice}</p>) : null}
             {activeTab === "floorplan" ? <TableFloorPlan role="waiter" user={user} /> : activeTab === "reservations" ? (<>
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex items-center gap-2">
@@ -188,28 +289,28 @@ export function WaiterDashboard() {
                   </div>
                   <div className="flex-1"/>
                   <div className="text-sm text-cream/50">
-                    {selectedDate === today ? "Today" : formatDate(selectedDate)} · {reservations.length} reservation{reservations.length !== 1 ? "s" : ""}
+                    {selectedDate === today ? "Today" : formatDate(selectedDate)} · {visibleReservations.length} reservation{visibleReservations.length !== 1 ? "s" : ""}{hiddenReservationCount > 0 ? ` · ${hiddenReservationCount} handled` : ""}
                   </div>
                 </div>
 
                 {reservationsLoading ? (<div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-gold-400"/>
-                  </div>) : reservations.length === 0 ? (<div className="text-center py-12 text-cream/50">
+                  </div>) : visibleReservations.length === 0 ? (<div className="text-center py-12 text-cream/50">
                     <Calendar className="mx-auto h-12 w-12 text-cream/20 mb-4"/>
-                    <p className="text-lg">No reservations for this date</p>
-                    <p className="text-sm mt-1">Reservations will appear here when customers book</p>
+                    <p className="text-lg">{keptReservations.length > 0 ? "All caught up" : "No reservations for this date"}</p>
+                    <p className="text-sm mt-1">{keptReservations.length > 0 ? "Completed and cancelled reservations are hidden — switch the status filter to review them." : "Reservations will appear here when customers book"}</p>
                   </div>) : (<div className="space-y-4">
-                    {reservations.map((reservation) => (<ReservationCard key={reservation._id} reservation={reservation} isExpanded={expandedReservation === reservation._id} onToggle={() => setExpandedReservation(expandedReservation === reservation._id ? null : reservation._id)} onStatusChange={handleStatusChange} isUpdating={updateReservationMutation.isPending}/>))}
+                    {visibleReservations.map((reservation) => (<ReservationCard key={reservation._id} reservation={reservation} isExpanded={expandedReservation === reservation._id} onToggle={() => setExpandedReservation(expandedReservation === reservation._id ? null : reservation._id)} onStatusChange={handleStatusChange} isUpdating={updateReservationMutation.isPending} onDelete={handleDeleteReservation} isDeleting={deleteReservationMutation.isPending}/>))}
                   </div>)}
               </>) : (<>
                 {messagesLoading ? (<div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-gold-400"/>
-                  </div>) : messages.length === 0 ? (<div className="text-center py-12 text-cream/50">
+                  </div>) : visibleMessages.length === 0 ? (<div className="text-center py-12 text-cream/50">
                     <MessageSquare className="mx-auto h-12 w-12 text-cream/20 mb-4"/>
-                    <p className="text-lg">No messages yet</p>
-                    <p className="text-sm mt-1">Customer inquiries will appear here</p>
+                    <p className="text-lg">{keptMessages.length > 0 ? "All caught up" : "No messages yet"}</p>
+                    <p className="text-sm mt-1">{keptMessages.length > 0 ? "Replied messages are hidden — use Show handled to review them." : "Customer inquiries will appear here"}</p>
                   </div>) : (<div className="space-y-4">
-                    {messages.map((message) => (<MessageCard key={message._id} message={message} isExpanded={expandedMessage === message._id} onToggle={() => setExpandedMessage(expandedMessage === message._id ? null : message._id)} onStatusChange={handleStatusChange} isUpdating={updateContactMutation.isPending}/>))}
+                    {visibleMessages.map((message) => (<MessageCard key={message._id} message={message} isExpanded={expandedMessage === message._id} onToggle={() => setExpandedMessage(expandedMessage === message._id ? null : message._id)} onStatusChange={handleStatusChange} isUpdating={updateContactMutation.isPending} onDelete={handleDeleteMessage} isDeleting={deleteMessageMutation.isPending}/>))}
                   </div>)}
               </>)}
           </div>
@@ -217,9 +318,10 @@ export function WaiterDashboard() {
       </div>
     </div>);
 }
-function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, isUpdating, }) {
+function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, isUpdating, onDelete, isDeleting, }) {
     return (<div className="bg-night-950 border border-white/10 rounded-xl overflow-hidden">
-      <button onClick={onToggle} className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors text-left">
+      <div className="flex items-center gap-2 p-4 hover:bg-white/5 transition-colors">
+      <button onClick={onToggle} className="flex flex-1 min-w-0 items-center justify-between gap-4 text-left">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gold-500/15 text-gold-300">
             <Users className="h-6 w-6"/>
@@ -236,6 +338,10 @@ function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, is
           {isExpanded ? <ChevronUp className="h-5 w-5 text-cream/50"/> : <ChevronDown className="h-5 w-5 text-cream/50"/>}
         </div>
       </button>
+      <button type="button" onClick={() => onDelete(reservation._id)} disabled={isDeleting} aria-label={`Delete reservation for ${reservation.name}`} title="Delete reservation" className="shrink-0 rounded-lg p-2 text-cream/40 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40">
+        <Trash2 className="h-4 w-4"/>
+      </button>
+      </div>
 
       {isExpanded && (<div className="border-t border-white/10 p-4 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -298,7 +404,7 @@ function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, is
         </div>)}
     </div>);
 }
-function MessageCard({ message, isExpanded, onToggle, onStatusChange, isUpdating, }) {
+function MessageCard({ message, isExpanded, onToggle, onStatusChange, isUpdating, onDelete, isDeleting, }) {
     const [orderStage, setOrderStage] = useState(() => normalizeOrderStatus(message.order?.status));
     const [orderSyncError, setOrderSyncError] = useState("");
     const activeStage = ORDER_STAGES.find((stage) => stage.id === orderStage) ?? ORDER_STAGES[0];
@@ -313,7 +419,8 @@ function MessageCard({ message, isExpanded, onToggle, onStatusChange, isUpdating
         }
     };
     return (<div className="bg-night-950 border border-white/10 rounded-xl overflow-hidden">
-      <button onClick={onToggle} className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors text-left">
+      <div className="flex items-center gap-2 p-4 hover:bg-white/5 transition-colors">
+      <button onClick={onToggle} className="flex flex-1 min-w-0 items-center justify-between gap-4 text-left">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/15 text-blue-300">
             <MessageSquare className="h-6 w-6"/>
@@ -333,6 +440,10 @@ function MessageCard({ message, isExpanded, onToggle, onStatusChange, isUpdating
           {isExpanded ? <ChevronUp className="h-5 w-5 text-cream/50"/> : <ChevronDown className="h-5 w-5 text-cream/50"/>}
         </div>
       </button>
+      <button type="button" onClick={() => onDelete(message._id)} disabled={isDeleting} aria-label={`Delete message from ${message.name}`} title="Delete message" className="shrink-0 rounded-lg p-2 text-cream/40 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40">
+        <Trash2 className="h-4 w-4"/>
+      </button>
+      </div>
 
       {isExpanded && (<div className="border-t border-white/10 p-4 space-y-4">
           {message.order && (<div className="rounded-xl border border-gold-400/20 bg-gold-400/5 p-4">

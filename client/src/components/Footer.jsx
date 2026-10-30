@@ -1,4 +1,5 @@
 import { Clock, Instagram, MapPin, Phone, Star } from "lucide-react";
+import logo from "../assets/logo.png";
 import { BUSINESS } from "../data/business";
 export function Footer() {
     return (<footer className="border-t border-white/10 bg-night-900/70">
@@ -7,9 +8,7 @@ export function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold-300 to-gold-600 font-display text-xl font-bold text-night-950 shadow-gold-glow">
-                S
-              </span>
+              <img src={logo} alt="Sky First Rooftop Lounge" width={32} height={32} className="h-8 w-8 rounded-full object-cover shadow-gold-glow ring-1 ring-gold-400/30"/>
               <div className="leading-tight">
                 <p className="font-display text-xl font-semibold text-cream">Sky First</p>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-gold-400">
