@@ -5,6 +5,7 @@ import { BUSINESS, currentOpenStatus, isOpenNow } from "../data/business";
 import { useReservationModal } from "./reservation/ReservationModalContext";
 import { useAuth } from "../lib/auth";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 const NAV_LINKS = [
     { href: "#menu", label: "Menu" },
     { href: "#location", label: "Location" },
@@ -68,9 +69,7 @@ export function Navbar() {
             : "bg-transparent"}`}>
       <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <a href="#top" className="group flex shrink-0 items-center gap-2 whitespace-nowrap">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-gold-300 to-gold-600 font-display text-lg font-bold text-night-950 shadow-gold-glow">
-            S
-          </span>
+          <img src={logo} alt="Sky First Rooftop Lounge logo" width={44} height={44} className="h-11 w-11 shrink-0 rounded-full object-cover shadow-gold-glow ring-1 ring-gold-400/30 transition-transform duration-300 group-hover:scale-105"/>
           <span className="flex flex-col leading-tight">
             <span className="font-display text-lg font-semibold leading-tight tracking-wide text-cream">
               Sky First
