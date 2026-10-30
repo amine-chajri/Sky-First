@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { CalendarCheck, ChevronRight, Clock, MapPin, Star, UtensilsCrossed, } from "lucide-react";
+import { CalendarCheck, ChevronRight, Clock, Star, UtensilsCrossed, } from "lucide-react";
 import { BUSINESS, currentOpenStatus, isOpenNow } from "../data/business";
 import { useReservationModal } from "./reservation/ReservationModalContext";
 import GhostFibers from "./GhostFibers";
@@ -73,13 +73,6 @@ export function Hero() {
 
       {/* Content */}
       <motion.div style={{ y: contentY, opacity: contentOpacity }} className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 pb-24 pt-32 text-center sm:px-6 lg:px-8">
-        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold-300 backdrop-blur-md">
-            <MapPin className="h-3.5 w-3.5"/>
-            Agdal, Rabat
-          </div>
-        </motion.div>
-
         <motion.h1 custom={1} variants={fadeUp} initial="hidden" animate="show" className="mx-auto max-w-4xl font-display text-4xl font-semibold leading-[1.1] text-cream sm:text-6xl lg:text-7xl">
           Elevate Your Dining Experience at{" "}
           <span className="gold-text">Agdal&rsquo;s Premier Rooftop Lounge</span>
@@ -103,10 +96,16 @@ export function Hero() {
         </motion.div>
 
         {/* Live info bar */}
-        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show" className="mx-auto mt-12 grid w-full max-w-3xl grid-cols-1 gap-px overflow-hidden rounded-2xl glass shadow-glass sm:grid-cols-3">
-          <InfoCell icon={<Clock className="h-4 w-4"/>} label={isOpenNow() ? "Open Status" : "Status"} value={currentOpenStatus()} accent={isOpenNow() ? "text-emerald-300" : "text-red-300"}/>
-          <InfoCell icon={<Star className="h-4 w-4 fill-gold-400 text-gold-400"/>} label="Google Rating" value={`⭐ ${BUSINESS.rating} (${BUSINESS.reviewCount} Reviews)`}/>
-          <InfoCell icon={<UtensilsCrossed className="h-4 w-4"/>} label="Price Range" value={BUSINESS.priceRange}/>
+        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show" className="mx-auto mt-12 w-full max-w-3xl">
+          <div className="relative overflow-hidden rounded-2xl border border-gold-400/20 bg-night-950/60 shadow-[0_24px_70px_-24px_rgba(0,0,0,0.85)] backdrop-blur-xl">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/60 to-transparent"/>
+            <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/[0.04]"/>
+            <div className="grid grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              <InfoCell icon={<Clock className="h-4 w-4"/>} label={isOpenNow() ? "Open Status" : "Status"} accent={isOpenNow() ? "text-gold-300" : "text-red-300"} value={<span className="inline-flex items-center gap-2"><span className={`h-1.5 w-1.5 rounded-full ${isOpenNow() ? "animate-pulse bg-gold-300" : "bg-red-400"}`}/>{currentOpenStatus()}</span>}/>
+              <InfoCell icon={<Star className="h-4 w-4 fill-gold-300 text-gold-300"/>} label="Google Rating" value={<span><span className="font-semibold text-cream">{BUSINESS.rating}</span><span className="ml-1.5 text-cream/50">({BUSINESS.reviewCount} reviews)</span></span>}/>
+              <InfoCell icon={<UtensilsCrossed className="h-4 w-4"/>} label="Price Range" value={BUSINESS.priceRange}/>
+            </div>
+          </div>
         </motion.div>
       </motion.div>
 
@@ -119,15 +118,15 @@ export function Hero() {
     </section>);
 }
 function InfoCell({ icon, label, value, accent, }) {
-    return (<div className="flex items-center gap-3 bg-night-900/40 px-5 py-4 text-left">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold-400/15 text-gold-300">
+    return (<div className="group flex items-center gap-3 px-4 py-3 text-left transition-colors duration-300 hover:bg-white/[0.03] sm:flex-col sm:justify-center sm:gap-2 sm:px-4 sm:py-4 sm:text-center">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold-400/25 bg-gold-400/10 text-gold-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 group-hover:border-gold-400/40 group-hover:bg-gold-400/15 group-hover:text-gold-200">
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream/50">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-cream/45">
           {label}
         </p>
-        <p className={`truncate text-sm font-semibold ${accent ?? "text-cream"}`}>
+        <p className={`mt-1 text-sm font-medium tracking-tight ${accent ?? "text-cream"}`}>
           {value}
         </p>
       </div>
