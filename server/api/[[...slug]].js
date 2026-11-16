@@ -6,7 +6,12 @@ let appPromise;
 async function getApp() {
   if (!appPromise) {
     appPromise = (async () => {
-      await connectDB();
+      try {
+        await connectDB();
+      } catch (err) {
+        console.error("[db] connection failed:", err);
+        throw err;
+      }
       return createApp();
     })();
   }
@@ -14,6 +19,11 @@ async function getApp() {
 }
 
 export default async function handler(req, res) {
-  const app = await getApp();
-  return app(req, res);
+  try {
+    const app = await getApp();
+    return app(req, res);
+  } catch (err) {
+    console.error("[handler] error:", err);
+    res.status(500).json({ message: "Server error", error: err?.message });
+  }
 }

@@ -28,6 +28,7 @@ export function createApp() {
   app.use(express.json({ limit: "50kb" }));
   app.use(morgan("dev"));
 
+  app.get("/", (req, res) => res.json({ message: "Server is running" }));
   app.use("/api/health", healthRoutes);
   app.use("/api/menu", menuRoutes);
   app.use("/api/reservations", reservationRoutes);
