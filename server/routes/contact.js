@@ -47,4 +47,15 @@ router.patch(
   })
 );
 
+router.delete(
+  "/:id",
+  ...staffAuth,
+  asyncHandler(async (req, res) => {
+    if (!/^[0-9a-fA-F]{24}$/.test(req.params.id)) throw new ApiError(404, "Message not found");
+    const message = await Contact.findByIdAndDelete(req.params.id);
+    if (!message) throw new ApiError(404, "Message not found");
+    res.json({ message: "Message deleted successfully", id: message._id.toString() });
+  })
+);
+
 export default router;

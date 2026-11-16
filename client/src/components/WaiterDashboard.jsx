@@ -53,7 +53,6 @@ async function updateContactStatus(id, status) {
     const { data } = await api.patch(`/contact/${id}/status`, { status });
     return data.message;
 }
-const DELETED_MESSAGES_KEY = "skyfirst_deleted_messages";
 const DELETED_RESERVATIONS_KEY = "skyfirst_deleted_reservations";
 function readStoredIds(key) {
     try {
@@ -64,9 +63,6 @@ function readStoredIds(key) {
     catch {
         return [];
     }
-}
-function readDeletedMessageIds() {
-    return readStoredIds(DELETED_MESSAGES_KEY);
 }
 function readDeletedReservationIds() {
     return readStoredIds(DELETED_RESERVATIONS_KEY);
@@ -101,8 +97,6 @@ export function WaiterDashboard() {
     const [expandedMessage, setExpandedMessage] = useState(null);
     const [activeTab, setActiveTab] = useState("floorplan");
     const [showHandledMessages, setShowHandledMessages] = useState(false);
-    const [deletedMessageIds, setDeletedMessageIds] = useState(readDeletedMessageIds);
-    const [deleteSyncNotice, setDeleteSyncNotice] = useState("");
     const [deletedReservationIds, setDeletedReservationIds] = useState(readDeletedReservationIds);
     const [reservationDeleteNotice, setReservationDeleteNotice] = useState("");
     const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
@@ -138,26 +132,18 @@ export function WaiterDashboard() {
     });
     const deleteMessageMutation = useMutation({
         mutationFn: async ({ id }) => {
-            setDeletedMessageIds((ids) => {
-                const next = ids.includes(id) ? ids : [...ids, id];
-                localStorage.setItem(DELETED_MESSAGES_KEY, JSON.stringify(next));
-                return next;
-            });
-            setExpandedMessage(null);
-            setDeleteSyncNotice("");
-            try {
-                await api.delete(`/contact/${id}`);
-                return { synced: true };
-            }
-            catch {
-                return { synced: false };
-            }
+            await api.delete(`/contact/${id}`);
+            return { id };
         },
-        onSuccess: (result) => {
-            if (!result?.synced) {
-                setDeleteSyncNotice("Removed from this dashboard. The server has no delete endpoint yet, so it may reappear on other devices.");
-            }
+        onSuccess: ({ id }) => {
+            queryClient.setQueryData(["waiter-messages"], (current = []) =>
+                current.filter((message) => message._id !== id)
+            );
             queryClient.invalidateQueries({ queryKey: ["waiter-messages"] });
+            setExpandedMessage(null);
+        },
+        onError: (err) => {
+            alert(extractApiError(err));
         },
     });
     const handleDeleteMessage = (id) => {
@@ -217,7 +203,7 @@ export function WaiterDashboard() {
         ? keptReservations.filter((reservation) => reservation.status !== "completed" && reservation.status !== "cancelled")
         : keptReservations;
     const hiddenReservationCount = keptReservations.length - visibleReservations.length;
-    const keptMessages = messages.filter((message) => !deletedMessageIds.includes(message._id));
+    const keptMessages = messages;
     const handledMessages = keptMessages.filter((message) => message.status === "replied");
     const visibleMessages = showHandledMessages
         ? keptMessages
@@ -270,7 +256,6 @@ export function WaiterDashboard() {
           <div className="p-6">
             {activeTab === "messages" && handledMessages.length > 0 ? (<div className="mb-4 flex items-center justify-end gap-3 text-xs text-cream/50"><span>{handledMessages.length} handled</span><button type="button" onClick={() => setShowHandledMessages((value) => !value)} className="rounded-full border border-white/15 px-3 py-1 text-xs font-medium text-cream/70 transition-colors hover:border-gold-400/50 hover:text-gold-200">{showHandledMessages ? "Hide handled" : "Show handled"}</button></div>) : null}
             {activeTab === "reservations" && reservationDeleteNotice ? (<p className="mb-4 rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{reservationDeleteNotice}</p>) : null}
-            {activeTab === "messages" && deleteSyncNotice ? (<p className="mb-4 rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{deleteSyncNotice}</p>) : null}
             {activeTab === "floorplan" ? <TableFloorPlan role="waiter" user={user} /> : activeTab === "reservations" ? (<>
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex items-center gap-2">
