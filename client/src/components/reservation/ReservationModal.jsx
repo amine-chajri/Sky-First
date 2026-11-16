@@ -14,6 +14,14 @@ export function ReservationModal() {
     const [submitting, setSubmitting] = useState(false);
     const [serverError, setServerError] = useState("");
     const [confirmation, setConfirmation] = useState(null);
+    const getTomorrowDate = () => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const yyyy = tomorrow.getFullYear();
+        const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+        const dd = String(tomorrow.getDate()).padStart(2, "0");
+        return `${yyyy}-${mm}-${dd}`;
+    };
     const form = useForm({
         resolver: zodResolver(reservationFormSchema),
         defaultValues: DEFAULT_VALUES,
@@ -72,8 +80,15 @@ export function ReservationModal() {
         setStep((s) => Math.max(s - 1, 1));
     };
     const onSubmit = async (values) => {
-        setSubmitting(true);
         setServerError("");
+        if (!values.date || values.date < getTomorrowDate()) {
+            const message = "Reservations must be booked at least 1 day in advance (starting from tomorrow).";
+            form.setError("date", { message });
+            setServerError(message);
+            setStep(1);
+            return;
+        }
+        setSubmitting(true);
         try {
             const res = await createReservation({
                 ...values,
@@ -88,7 +103,6 @@ export function ReservationModal() {
             setSubmitting(false);
         }
     };
-    const today = new Date().toLocaleDateString("en-CA");
     const isLoadingSlots = availability.isFetching;
     return (<AnimatePresence>
       {open && (<div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -118,7 +132,7 @@ export function ReservationModal() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-y-auto">
                   <div className="flex-1 px-6 py-6">
                     <AnimatePresence mode="wait">
-                      {step === 1 && (<StepDateTime key="step1" form={form} minDate={today} watchDate={watchDate} watchTimeSlot={watchTimeSlot} availability={availability.data} isLoadingSlots={isLoadingSlots}/>)}
+                      {step === 1 && (<StepDateTime key="step1" form={form} minDate={getTomorrowDate()} watchDate={watchDate} watchTimeSlot={watchTimeSlot} availability={availability.data} isLoadingSlots={isLoadingSlots}/>)}
                       {step === 2 && <StepGuests key="step2" form={form}/>}
                       {step === 3 && <StepSeating key="step3" form={form}/>}
                       {step === 4 && <StepDetails key="step4" form={form}/>}

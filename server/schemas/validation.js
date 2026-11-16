@@ -20,17 +20,6 @@ export const reservationSchema = z
     tableNumber: z.coerce.number().int().min(1).optional(),
   })
   .superRefine((data, ctx) => {
-    const today = new Date();
-    const [y, m, d] = data.date.split("-").map(Number);
-    const booked = new Date(y, m - 1, d);
-    if (booked.getTime() < new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["date"],
-        message: "Reservation date cannot be in the past",
-      });
-    }
-
     const hour = Number(data.timeSlot.split(":")[0]);
     if (hour < BUSINESS.openHour || hour >= BUSINESS.closeHour) {
       ctx.addIssue({

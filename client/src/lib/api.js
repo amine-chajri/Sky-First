@@ -38,6 +38,8 @@ export function extractApiError(err) {
         }
         if (payload?.error)
             return payload.error;
+        if (payload?.message)
+            return payload.message;
         return err.message;
     }
     return "Something went wrong. Please try again.";

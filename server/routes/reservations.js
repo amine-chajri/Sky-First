@@ -15,6 +15,16 @@ import { generateConfirmationCode, businessTimeSlots, MAX_SLOT_CAPACITY } from "
 const router = Router();
 const staffAuth = [requireAuth, requireActiveUser, requireRole("admin", "waiter")];
 
+function isTodayOrEarlier(dateString) {
+  const [year, month, day] = String(dateString).split("-").map(Number);
+  if (![year, month, day].every(Number.isFinite)) return true;
+  const requested = new Date(year, month - 1, day);
+  if (Number.isNaN(requested.getTime())) return true;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return requested <= today;
+}
+
 router.get(
   "/availability",
   validateQuery(availabilitySchema),
@@ -34,6 +44,10 @@ router.post(
   validate(reservationSchema),
   asyncHandler(async (req, res) => {
     const data = req.body;
+    if (isTodayOrEarlier(data.date)) {
+      res.status(400).json({ message: "Same-day reservations are not allowed. Please select tomorrow or a future date." });
+      return;
+    }
     if ((await countBookedReservations(data.date, data.timeSlot)) >= MAX_SLOT_CAPACITY) {
       throw new ApiError(409, "This time slot is fully booked. Please pick another.");
     }
