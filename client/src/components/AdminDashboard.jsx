@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, Loader2, X } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, X, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { api, extractApiError } from "../lib/api";
 import { TableFloorPlan } from "./TableFloorPlan";
@@ -43,6 +43,21 @@ async function updateMenuItem(id, payload) {
 async function deleteMenuItem(id) {
     await api.delete(`/menu/${id}`);
 }
+async function fetchContactMessages() {
+    const { data } = await api.get("/contact");
+    return data.messages;
+}
+const MESSAGE_STATUS_COLORS = {
+    new: "bg-gold-500/20 text-gold-300 border-gold-400/30",
+    read: "bg-blue-500/20 text-blue-300 border-blue-400/30",
+    replied: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
+};
+function formatMessageDate(value) {
+    if (!value)
+        return "";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "" : date.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
 function formatCategory(category) {
     return category.charAt(0).toUpperCase() + category.slice(1);
 }
@@ -68,9 +83,14 @@ export function AdminDashboard() {
     const [editingItem, setEditingItem] = useState(null);
     const [formData, setFormData] = useState(emptyForm);
     const [formErrors, setFormErrors] = useState({});
+    const [expandedMessage, setExpandedMessage] = useState(null);
     const { data: items = [], isLoading } = useQuery({
         queryKey: ["admin-menu-items"],
         queryFn: fetchAllMenuItems,
+    });
+    const { data: messages = [], isLoading: messagesLoading } = useQuery({
+        queryKey: ["admin-messages"],
+        queryFn: fetchContactMessages,
     });
     const createMutation = useMutation({
         mutationFn: createMenuItem,
@@ -101,6 +121,28 @@ export function AdminDashboard() {
             alert(extractApiError(err));
         },
     });
+    const deleteMessageMutation = useMutation({
+        mutationFn: async (id) => {
+            await api.delete(`/contact/${id}`);
+            return id;
+        },
+        onSuccess: (id) => {
+            queryClient.setQueryData(["admin-messages"], (current = []) =>
+                current.filter((message) => message._id !== id)
+            );
+            queryClient.invalidateQueries({ queryKey: ["admin-messages"] });
+            setExpandedMessage(null);
+        },
+        onError: (err) => {
+            alert(extractApiError(err));
+        },
+    });
+    const handleDeleteMessage = (message) => {
+        const label = message?.name ? `the message from ${message.name}` : "this message";
+        if (window.confirm(`Delete ${label}? This cannot be undone.`)) {
+            deleteMessageMutation.mutate(message._id);
+        }
+    };
     const openModal = (item) => {
         if (item) {
             setEditingItem(item);
@@ -190,6 +232,61 @@ export function AdminDashboard() {
         <WaiterAccountsTable />
 
         <TableFloorPlan role="admin" user={user} />
+
+        <section className="mb-8 bg-night-900/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <h2 className="font-display text-xl font-semibold text-cream">
+              Customer Messages <span className="text-cream/50 font-normal text-lg">({messages.length})</span>
+            </h2>
+          </div>
+          {messagesLoading ? (<div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-gold-400"/>
+            </div>) : messages.length === 0 ? (<div className="p-12 text-center text-cream/40">
+              <MessageSquare className="mx-auto h-12 w-12 text-cream/20 mb-4"/>
+              <p>No customer messages yet.</p>
+            </div>) : (<div className="divide-y divide-white/5">
+              {messages.map((message) => {
+                const isExpanded = expandedMessage === message._id;
+                return (<div key={message._id} className="p-4 sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 text-blue-300">
+                        <MessageSquare className="h-5 w-5"/>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <button type="button" onClick={() => setExpandedMessage(isExpanded ? null : message._id)} className="min-w-0 flex-1 text-left">
+                            <h3 className="truncate font-medium text-cream">{message.name}</h3>
+                            <p className="truncate text-sm text-cream/50">{message.subject}</p>
+                            {message.order && (<p className="mt-1 text-xs text-gold-300">Order {message.order.orderId} · Table {message.order.tableNumber}</p>)}
+                          </button>
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${MESSAGE_STATUS_COLORS[message.status] || MESSAGE_STATUS_COLORS.new}`}>{message.status}</span>
+                            <span className="hidden text-xs text-cream/40 sm:block">{formatMessageDate(message.createdAt)}</span>
+                            <button type="button" onClick={() => setExpandedMessage(isExpanded ? null : message._id)} className="rounded-lg p-2 text-cream/40 transition-colors hover:bg-white/10 hover:text-cream" aria-label={isExpanded ? "Collapse message" : "Expand message"}>
+                              {isExpanded ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
+                            </button>
+                            <button type="button" onClick={() => handleDeleteMessage(message)} disabled={deleteMessageMutation.isPending} className="rounded-lg p-2 text-cream/40 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40" aria-label={`Delete message from ${message.name}`} title="Delete message">
+                              <Trash2 className="h-4 w-4"/>
+                            </button>
+                          </div>
+                        </div>
+                        {isExpanded && (<div className="mt-4 space-y-3">
+                            <p className="whitespace-pre-wrap rounded-lg bg-night-950/50 p-3 text-sm text-cream">{message.message}</p>
+                            <div className="grid gap-2 text-sm sm:grid-cols-2">
+                              <p className="text-cream/60">Email: <span className="text-cream">{message.email}</span></p>
+                              {message.phone && <p className="text-cream/60">Phone: <span className="text-cream">{message.phone}</span></p>}
+                            </div>
+                            {message.order && (<div className="rounded-lg border border-gold-400/20 bg-gold-400/5 p-3 text-sm">
+                                <p className="text-cream/70">Dish: <span className="text-cream">{message.order.dishName}</span> · Quantity: <span className="text-cream">{message.order.quantity}</span></p>
+                                <p className="mt-1 text-cream/70">Special instructions: <span className="text-cream">{message.order.specialInstructions || "None"}</span></p>
+                              </div>)}
+                          </div>)}
+                      </div>
+                    </div>
+                  </div>);
+              })}
+            </div>)}
+        </section>
 
         {isLoading ? (<div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gold-400"/>
