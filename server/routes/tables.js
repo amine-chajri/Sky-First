@@ -8,6 +8,52 @@ import { requireAuth, requireActiveUser, requireRole } from "../middleware/auth.
 const router = Router();
 const staffAuth = [requireAuth, requireActiveUser, requireRole("admin", "waiter")];
 
+function tableNumberPattern(tableNumber) {
+  return new RegExp(`(^|\\D)${Number(tableNumber)}(\\D|$)`);
+}
+
+async function archiveActiveOrders(table) {
+  const filters = [
+    {
+      "order.status": "Pending",
+      "order.tableNumber": { $regex: tableNumberPattern(table.tableNumber) },
+    },
+  ];
+  if (table.currentOrderId) {
+    filters.push({ "order.status": "Pending", "order.orderId": table.currentOrderId });
+  }
+  const result = await Contact.updateMany(
+    { $or: filters },
+    {
+      $set: {
+        "order.status": "Completed",
+        "order.archivedAt": new Date().toISOString(),
+      },
+    }
+  );
+  return result.modifiedCount ?? 0;
+}
+
+async function completeActiveReservation(table) {
+  const today = new Date().toLocaleDateString("en-CA");
+  const result = await Reservation.updateMany(
+    { tableNumber: table.tableNumber, date: today, status: "confirmed" },
+    { $set: { status: "completed" } }
+  );
+  return result.modifiedCount ?? 0;
+}
+
+function serializeTable(table) {
+  return {
+    ...table.toObject(),
+    id: table._id.toString(),
+    activeOrders: [],
+    orderItems: table.orderItems ?? [],
+    reservation: null,
+    reservationName: null,
+  };
+}
+
 router.get(
   "/",
   ...staffAuth,
@@ -25,24 +71,42 @@ router.get(
       if (!tableNumber) continue;
       const key = Number(tableNumber);
       const current = ordersByTable.get(key) || [];
-      current.push(contact.order);
+      current.push({
+        id: String(contact._id),
+        orderId: contact.order.orderId,
+        dishName: contact.order.dishName,
+        quantity: contact.order.quantity,
+        specialInstructions: contact.order.specialInstructions || "",
+        status: contact.order.status,
+        timestamp: contact.order.timestamp,
+      });
       ordersByTable.set(key, current);
     }
 
     res.json({ tables: tables.map((table) => {
       const reservation = reservationsByTable.get(table.tableNumber);
-      const orders = ordersByTable.get(table.tableNumber) || [];
-      const activeOrder = orders.at(-1);
-      const hasActiveOrder = orders.length > 0;
+      const activeOrders = ordersByTable.get(table.tableNumber) || [];
+      const activeOrder = activeOrders.at(-1);
+      const hasActiveOrder = activeOrders.length > 0;
       const status = table.status === "OCCUPIED" || hasActiveOrder ? "OCCUPIED" : reservation ? "RESERVED" : table.status;
       return {
         ...table,
         id: table._id.toString(),
         status,
+        activeOrders,
         reservationId: reservation?._id.toString() || null,
         reservationName: reservation?.name || null,
+        reservation: reservation
+          ? {
+              id: String(reservation._id),
+              name: reservation.name,
+              timeSlot: reservation.timeSlot,
+              guests: reservation.guests,
+              phone: reservation.phone,
+            }
+          : null,
         currentOrderId: activeOrder?.orderId || (hasActiveOrder ? null : table.currentOrderId),
-        orderItems: hasActiveOrder ? orders.map((order) => `${order.quantity} × ${order.dishName}${order.specialInstructions ? ` — ${order.specialInstructions}` : ""}`) : table.orderItems,
+        orderItems: hasActiveOrder ? activeOrders.map((order) => `${order.quantity} × ${order.dishName}${order.specialInstructions ? ` — ${order.specialInstructions}` : ""}`) : table.orderItems,
       };
     }) });
   })
@@ -64,6 +128,58 @@ router.post(
 );
 
 router.patch(
+  "/:id/status",
+  ...staffAuth,
+  asyncHandler(async (req, res) => {
+    const { status, createOrder } = req.body ?? {};
+    if (!TABLE_STATUSES.includes(status)) throw new ApiError(400, "Invalid table status");
+    const table = await Table.findById(req.params.id);
+    if (!table) throw new ApiError(404, "Table not found");
+
+    let archivedOrders = 0;
+    let completedReservations = 0;
+
+    if (status === "OCCUPIED" && createOrder && !table.currentOrderId) {
+      table.currentOrderId = `ORD-${Date.now().toString().slice(-6)}`;
+      table.orderItems = [];
+    }
+    if (status === "FREE") {
+      archivedOrders = await archiveActiveOrders(table);
+      completedReservations = await completeActiveReservation(table);
+      table.currentOrderId = null;
+      table.orderItems = [];
+      table.reservationId = null;
+      table.reservationDate = null;
+    }
+
+    table.status = status;
+    await table.save();
+    res.json({ table: serializeTable(table), archivedOrders, completedReservations });
+  })
+);
+
+router.post(
+  "/:id/clear",
+  ...staffAuth,
+  asyncHandler(async (req, res) => {
+    const table = await Table.findById(req.params.id);
+    if (!table) throw new ApiError(404, "Table not found");
+
+    const archivedOrders = await archiveActiveOrders(table);
+    const completedReservations = await completeActiveReservation(table);
+
+    table.status = "FREE";
+    table.currentOrderId = null;
+    table.orderItems = [];
+    table.reservationId = null;
+    table.reservationDate = null;
+    await table.save();
+
+    res.json({ table: serializeTable(table), archivedOrders, completedReservations });
+  })
+);
+
+router.patch(
   "/:id",
   ...staffAuth,
   asyncHandler(async (req, res) => {
@@ -78,14 +194,12 @@ router.patch(
         table.orderItems = [];
       }
       if (status === "FREE") {
-        if (table.currentOrderId) {
-          await Contact.updateMany(
-            { "order.orderId": table.currentOrderId, "order.status": "Pending" },
-            { $set: { "order.status": "Completed" } }
-          );
-        }
+        await archiveActiveOrders(table);
+        await completeActiveReservation(table);
         table.currentOrderId = null;
         table.orderItems = [];
+        table.reservationId = null;
+        table.reservationDate = null;
       }
     }
     if (addItem !== undefined) {
