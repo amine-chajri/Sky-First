@@ -4,13 +4,13 @@ import { Menu, Phone, Star, X, LayoutDashboard, LogIn, LogOut } from "lucide-rea
 import { BUSINESS, currentOpenStatus, isOpenNow } from "../data/business";
 import { useReservationModal } from "./reservation/ReservationModalContext";
 import { useAuth } from "../lib/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 const NAV_LINKS = [
-    { href: "#menu", label: "Menu" },
-    { href: "#location", label: "Location" },
-    { href: "#reviews", label: "Reviews" },
-    { href: "#contact", label: "Contact" },
+    { href: "/#menu", label: "Menu" },
+    { href: "/#location", label: "Location" },
+    { href: "/#reviews", label: "Reviews" },
+    { href: "/#contact", label: "Contact" },
 ];
 export function Navbar() {
     const { openReservation } = useReservationModal();
@@ -30,17 +30,17 @@ export function Navbar() {
     };
     const renderAuthLinks = () => {
         if (!token) {
-            return (<a href="/login" className="btn-gold whitespace-nowrap !px-3 !py-1.5">
+            return (<Link to="/login" className="btn-gold whitespace-nowrap !px-3 !py-1.5">
           <LogIn className="h-4 w-4 mr-2"/>
           Sign In
-        </a>);
+        </Link>);
         }
         if (user?.role === "admin") {
             return (<>
-          <a href="/admin" className="btn-gold flex items-center gap-2 whitespace-nowrap !px-3 !py-1.5">
+          <Link to="/admin" className="btn-gold flex items-center gap-2 whitespace-nowrap !px-3 !py-1.5">
             <LayoutDashboard className="h-4 w-4"/>
             Admin Dashboard
-          </a>
+          </Link>
           <button onClick={handleLogout} className="btn-outline inline-flex items-center whitespace-nowrap !px-3 !py-1.5">
             <LogOut className="h-4 w-4 mr-2"/>
             Logout
@@ -49,10 +49,10 @@ export function Navbar() {
         }
         if (user?.role === "waiter") {
             return (<>
-          <a href="/waiter" className="btn-gold flex items-center gap-2 whitespace-nowrap !px-3 !py-1.5">
+          <Link to="/waiter" className="btn-gold flex items-center gap-2 whitespace-nowrap !px-3 !py-1.5">
             <LayoutDashboard className="h-4 w-4"/>
             Waiter Dashboard
-          </a>
+          </Link>
           <button onClick={handleLogout} className="btn-outline inline-flex items-center whitespace-nowrap !px-3 !py-1.5">
             <LogOut className="h-4 w-4 mr-2"/>
             Logout
@@ -68,7 +68,7 @@ export function Navbar() {
             ? "border-b border-white/10 bg-night-950/80 backdrop-blur-xl"
             : "bg-transparent"}`}>
       <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3">
-        <a href="#top" className="group flex shrink-0 items-center gap-2 whitespace-nowrap">
+        <Link to="/" onClick={() => setMobileOpen(false)} className="group flex shrink-0 items-center gap-2 whitespace-nowrap">
           <img src={logo} alt="Sky First Rooftop Lounge logo" width={44} height={44} className="h-11 w-11 shrink-0 rounded-full object-cover shadow-gold-glow ring-1 ring-gold-400/30 transition-transform duration-300 group-hover:scale-105"/>
           <span className="flex flex-col leading-tight">
             <span className="font-display text-lg font-semibold leading-tight tracking-wide text-cream">
@@ -78,13 +78,13 @@ export function Navbar() {
               Rooftop Lounge
             </span>
           </span>
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-6 lg:flex">
           <div className="flex items-center gap-4">
-            {NAV_LINKS.map((link) => (<a key={link.href} href={link.href} className="whitespace-nowrap text-sm font-medium text-cream/80 transition-colors hover:text-gold-300">
+            {NAV_LINKS.map((link) => (<Link key={link.href} to={link.href} className="whitespace-nowrap text-sm font-medium text-cream/80 transition-colors hover:text-gold-300">
               {link.label}
-            </a>))}
+            </Link>))}
             <div className={`hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold xl:flex ${isOpenNow()
               ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30"
               : "bg-red-500/15 text-red-300 ring-1 ring-red-400/30"}`}>
@@ -113,9 +113,9 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (<motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden border-t border-white/10 bg-night-950/95 backdrop-blur-xl lg:hidden">
             <div className="flex flex-col gap-1 px-4 py-4">
-              {NAV_LINKS.map((link) => (<a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium text-cream/85 hover:bg-white/5">
+              {NAV_LINKS.map((link) => (<Link key={link.href} to={link.href} onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium text-cream/85 hover:bg-white/5">
                   {link.label}
-                </a>))}
+                </Link>))}
               <a href={BUSINESS.phoneHref} className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-gold-300">
                 <Phone className="h-4 w-4"/> {BUSINESS.phone}
               </a>

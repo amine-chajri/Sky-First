@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Seo } from "./components/Seo";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
@@ -35,31 +36,50 @@ function ProtectedLayout({ children }) {
       </div>
     </ReservationModalProvider>);
 }
+function ScrollToHash() {
+    const { pathname, hash, key } = useLocation();
+    useEffect(() => {
+        if (!hash) {
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            return undefined;
+        }
+        const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+        if (!target) return undefined;
+        const frame = requestAnimationFrame(() => {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [pathname, hash, key]);
+    return null;
+}
 export default function App() {
-    return (<Routes>
-      <Route path="/" element={<PublicLayout>
-            <Hero />
-            <HighlightsMarquee />
-            <MenuSection />
-            <LocationSection />
-            <ReviewsSection />
-            <ContactSection />
-          </PublicLayout>}/>
-      <Route path="/login" element={<Login />}/>
-      <Route path="/order/:orderId" element={<PublicLayout>
-            <OrderStatusTracker />
-          </PublicLayout>}/>
-      <Route path="/floating-navbar-demo" element={<FloatingNavDemo />}/>
-      <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}>
-            <ProtectedLayout>
-              <AdminDashboard />
-            </ProtectedLayout>
-          </ProtectedRoute>}/>
-      <Route path="/waiter" element={<ProtectedRoute allowedRoles={["waiter"]}>
-            <ProtectedLayout>
-              <WaiterDashboard />
-            </ProtectedLayout>
-          </ProtectedRoute>}/>
-      <Route path="*" element={<Navigate to="/" replace/>}/>
-    </Routes>);
+    return (<>
+      <ScrollToHash />
+      <Routes>
+        <Route path="/" element={<PublicLayout>
+              <Hero />
+              <HighlightsMarquee />
+              <MenuSection />
+              <LocationSection />
+              <ReviewsSection />
+              <ContactSection />
+            </PublicLayout>}/>
+        <Route path="/login" element={<Login />}/>
+        <Route path="/order/:orderId" element={<PublicLayout>
+              <OrderStatusTracker />
+            </PublicLayout>}/>
+        <Route path="/floating-navbar-demo" element={<FloatingNavDemo />}/>
+        <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedLayout>
+                <AdminDashboard />
+              </ProtectedLayout>
+            </ProtectedRoute>}/>
+        <Route path="/waiter" element={<ProtectedRoute allowedRoles={["waiter"]}>
+              <ProtectedLayout>
+                <WaiterDashboard />
+              </ProtectedLayout>
+            </ProtectedRoute>}/>
+        <Route path="*" element={<Navigate to="/" replace/>}/>
+      </Routes>
+    </>);
 }
