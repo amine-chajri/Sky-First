@@ -3,7 +3,7 @@ import { BUSINESS } from "../data/business";
 export function HighlightsMarquee() {
     const items = BUSINESS.highlights;
     const doubled = [...items, ...items];
-    return (<div className="relative overflow-hidden border-y border-white/10 bg-night-900/60 py-3">
+    return (<div className="relative overflow-hidden border-y border-gold-400/20 bg-night-900/60 py-3">
       <div className="flex w-max animate-marquee-slow items-center gap-10">
         {doubled.map((item, i) => (<span key={`${item}-${i}`} className="flex items-center gap-2 whitespace-nowrap text-sm font-medium tracking-wide text-cream/70">
             <Sparkles className="h-4 w-4 text-gold-400"/>

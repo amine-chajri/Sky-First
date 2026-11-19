@@ -5,6 +5,7 @@ import { Loader2, Minus, Plus, Search, SlidersHorizontal, Star, X } from "lucide
 import { CATEGORY_LABELS } from "../data/business";
 import { useMenu } from "../hooks/useMenu";
 import { BorderBeam } from "./ui/border-beam";
+import { SectionFrame } from "./ui/section-frame";
 import { extractApiError, submitContact } from "../lib/api";
 import { saveOrder } from "../lib/orderTracking";
 const CATEGORIES = Object.keys(CATEGORY_LABELS);
@@ -51,6 +52,7 @@ export function MenuSection() {
         </p>
       </div>
 
+      <SectionFrame>
       {/* Category tabs */}
       <div className="mb-6 flex flex-wrap justify-center gap-2" role="tablist">
         <TabButton active={activeCategory === "all"} onClick={() => setActiveCategory("all")}>
@@ -102,6 +104,7 @@ export function MenuSection() {
           }}/>))}
         </AnimatePresence>
       </motion.div>
+      </SectionFrame>
 
       {selectedDish && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !isSubmittingOrder) setSelectedDish(null); }}>

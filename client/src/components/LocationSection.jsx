@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Car, Clock, MapPin, Navigation, Phone, Plus, ShoppingBag } from "lucide-react";
 import { BUSINESS, currentOpenStatus, isOpenNow } from "../data/business";
+import { SectionFrame } from "./ui/section-frame";
 export function LocationSection() {
     return (<section id="location" className="relative mx-auto max-w-7xl scroll-mt-24 px-4 py-20 sm:px-6 lg:px-8 sm:py-28">
       <div className="mb-10 text-center">
@@ -12,6 +13,7 @@ export function LocationSection() {
         </p>
       </div>
 
+      <SectionFrame>
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Map */}
         <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.6 }} className="glass relative min-h-[360px] overflow-hidden rounded-3xl">
@@ -79,6 +81,7 @@ export function LocationSection() {
           </div>
         </motion.div>
       </div>
+      </SectionFrame>
     </section>);
 }
 function ActionCard({ href, icon, title, subtitle, }) {

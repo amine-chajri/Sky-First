@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { BUSINESS } from "../data/business";
+import { SectionFrame } from "./ui/section-frame";
 const REVIEWS = [
     {
         quote: "The breakfast was delicious and the customer service was very nice. Amazing view over Agdal while you enjoy your croissants.",
@@ -51,6 +52,7 @@ export function ReviewsSection() {
           <h2 className="section-title">Loved Across Agdal</h2>
         </div>
 
+        <SectionFrame>
         <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           {/* Slider */}
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.6 }} className="glass relative flex min-h-[280px] flex-col overflow-hidden rounded-3xl p-8 sm:p-10" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
@@ -121,6 +123,7 @@ export function ReviewsSection() {
             </div>
           </motion.div>
         </div>
+        </SectionFrame>
       </div>
     </section>);
 }

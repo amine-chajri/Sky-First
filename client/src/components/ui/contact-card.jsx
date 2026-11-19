@@ -18,10 +18,10 @@ export function ContactCard({
       )}
       {...props}
     >
-      <PlusIcon className="absolute -top-3 -left-3 h-6 w-6" />
-      <PlusIcon className="absolute -top-3 -right-3 h-6 w-6" />
-      <PlusIcon className="absolute -bottom-3 -left-3 h-6 w-6" />
-      <PlusIcon className="absolute -right-3 -bottom-3 h-6 w-6" />
+      <PlusIcon className="pointer-events-none absolute -top-3 -left-3 h-6 w-6" />
+      <PlusIcon className="pointer-events-none absolute -top-3 -right-3 h-6 w-6" />
+      <PlusIcon className="pointer-events-none absolute -bottom-3 -left-3 h-6 w-6" />
+      <PlusIcon className="pointer-events-none absolute -right-3 -bottom-3 h-6 w-6" />
       <div className="flex flex-col justify-between lg:col-span-2">
         <div className="relative h-full space-y-4 px-4 py-8 md:p-8">
           <h2 className="font-display text-3xl font-semibold md:text-4xl lg:text-5xl">
