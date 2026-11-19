@@ -104,6 +104,7 @@ export function ReservationModal() {
         }
     };
     const isLoadingSlots = availability.isFetching;
+    const availabilityError = availability.error?.message ?? availability.error;
     return (<AnimatePresence>
       {open && (<div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpen(false)} className="absolute inset-0 bg-night-950/80 backdrop-blur-sm"/>

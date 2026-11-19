@@ -11,6 +11,12 @@ import { validate, validateQuery, asyncHandler, ApiError } from "../middleware/i
 import { reservationSchema, availabilitySchema } from "../schemas/validation.js";
 import { requireAuth, requireActiveUser, requireRole } from "../middleware/auth.js";
 import { generateConfirmationCode, businessTimeSlots, MAX_SLOT_CAPACITY } from "../utils/index.js";
+import {
+  emailStatus,
+  sendReservationRequestEmail,
+  sendReservationConfirmedEmail,
+  sendReservationCancelledEmail,
+} from "../utils/mailer.js";
 
 const router = Router();
 const staffAuth = [requireAuth, requireActiveUser, requireRole("admin", "waiter")];
@@ -86,10 +92,13 @@ router.post(
       if (!table) throw new ApiError(409, "No suitable table is available for this party and date");
     }
 
+    const reservationCode = generateConfirmationCode();
     const reservation = await createReservation({
       ...data,
       tableNumber: table.tableNumber,
-      confirmationCode: generateConfirmationCode(),
+      customerEmail: data.email,
+      confirmationCode: reservationCode,
+      reservationCode,
     });
     if (reservation.date === new Date().toLocaleDateString("en-CA")) {
       table.reservationId = String(reservation._id);
@@ -97,11 +106,22 @@ router.post(
       if (table.status !== "OCCUPIED") table.status = "RESERVED";
       await table.save();
     }
+    try {
+      await sendReservationRequestEmail(reservation);
+    } catch (error) {
+      console.error(
+        `[email] Could not send request email for reservation ${reservationCode}:`,
+        error
+      );
+    }
+
     res.status(201).json({
       message: "Table reserved successfully",
       reservation: {
         id: reservation._id,
         confirmationCode: reservation.confirmationCode,
+        reservationCode: reservation.reservationCode,
+        customerEmail: reservation.customerEmail,
         date: reservation.date,
         timeSlot: reservation.timeSlot,
         guests: reservation.guests,
@@ -111,6 +131,43 @@ router.post(
         tableNumber: reservation.tableNumber,
       },
     });
+  })
+);
+
+router.post(
+  "/:id/resend-email",
+  ...staffAuth,
+  asyncHandler(async (req, res) => {
+    const reservation = await Reservation.findById(req.params.id);
+    if (!reservation) throw new ApiError(404, "Reservation not found");
+
+    const to = reservation.customerEmail || reservation.email;
+    if (!to) throw new ApiError(400, "This reservation has no customer email address");
+
+    if (!emailStatus().configured) {
+      throw new ApiError(
+        503,
+        "Email is not configured on the server. Set SMTP_HOST, SMTP_USER and SMTP_PASS in server/.env."
+      );
+    }
+
+    // Resend the email that matches the reservation's current state.
+    const send =
+      reservation.status === "cancelled"
+        ? sendReservationCancelledEmail
+        : reservation.status === "pending"
+          ? sendReservationRequestEmail
+          : sendReservationConfirmedEmail;
+
+    const result = await send(reservation);
+    if (!result.sent) {
+      throw new ApiError(
+        502,
+        `The email to ${to} could not be sent. Check the server logs for the SMTP error.`
+      );
+    }
+
+    res.json({ message: `Email sent to ${to}`, sentTo: to, status: reservation.status });
   })
 );
 
@@ -130,8 +187,10 @@ router.patch(
   asyncHandler(async (req, res) => {
     const { status } = req.body ?? {};
     if (!["confirmed", "cancelled", "completed"].includes(status)) throw new ApiError(400, "Invalid status");
-    const reservation = await Reservation.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const reservation = await Reservation.findById(req.params.id);
     if (!reservation) throw new ApiError(404, "Reservation not found");
+    reservation.status = status;
+    await reservation.save();
     const table = await Table.findOne({ tableNumber: reservation.tableNumber });
     if (table && table.reservationId === String(reservation._id)) {
       table.reservationId = null;
@@ -139,6 +198,22 @@ router.patch(
       if (table.status === "RESERVED") table.status = "FREE";
       await table.save();
     }
+
+    try {
+      if (status === "confirmed") {
+        await sendReservationConfirmedEmail(reservation);
+      } else if (status === "cancelled") {
+        await sendReservationCancelledEmail(reservation);
+      }
+    } catch (error) {
+      console.error(
+        `[email] Could not send ${status} email for reservation ${
+          reservation.reservationCode || reservation.confirmationCode
+        }:`,
+        error
+      );
+    }
+
     res.json({ reservation });
   })
 );

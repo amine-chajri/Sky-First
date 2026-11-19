@@ -1,5 +1,11 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 
+// Always read server/.env, whatever directory the process was started from,
+// then fall back to a .env in the current working directory.
+const serverRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+dotenv.config({ path: path.join(serverRoot, ".env") });
 dotenv.config();
 
 export const config = {
@@ -8,6 +14,13 @@ export const config = {
   mongoUri: process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/skyfirst",
   jwtSecret: process.env.JWT_SECRET ?? "sky-first-dev-secret",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
+  email: {
+    host: process.env.SMTP_HOST ?? "",
+    port: Number(process.env.SMTP_PORT ?? 587),
+    user: process.env.SMTP_USER ?? "",
+    pass: process.env.SMTP_PASS ?? "",
+    from: process.env.EMAIL_FROM ?? "",
+  },
 };
 
 export const BUSINESS = {

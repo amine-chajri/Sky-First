@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "node --watch server.js",
     "start": "node server.js",
-    "seed": "node seed/run.js"
+    "seed": "node seed/run.js",
+    "email:test": "node scripts/test-email.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -19,6 +20,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.0",
     "morgan": "^1.10.0",
+    "nodemailer": "^10.6.0",
     "zod": "^4.6.7"
   }
 }

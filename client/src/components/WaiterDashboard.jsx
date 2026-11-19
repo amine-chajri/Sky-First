@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { Loader2, Calendar, Clock, Users, MapPin, ChevronDown, ChevronUp, MessageSquare, Trash2 } from "lucide-react";
+import { Loader2, Calendar, Clock, Users, MapPin, ChevronDown, ChevronUp, MessageSquare, Trash2, Mail } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { api, extractApiError } from "../lib/api";
 import { TableFloorPlan } from "./TableFloorPlan";
@@ -13,14 +13,22 @@ const SEATING_LABELS = {
     "standard-dining": "Standard Dining",
 };
 const STATUS_LABELS = {
+    pending: "Pending",
     confirmed: "Confirmed",
     cancelled: "Cancelled",
     completed: "Completed",
 };
 const STATUS_COLORS = {
+    pending: "bg-amber-500/20 text-amber-300 border-amber-400/30",
     confirmed: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
     cancelled: "bg-red-500/20 text-red-300 border-red-400/30",
     completed: "bg-blue-500/20 text-blue-300 border-blue-400/30",
+};
+const RESEND_LABELS = {
+    pending: "Resend request email",
+    confirmed: "Resend confirmation email",
+    cancelled: "Resend cancellation email",
+    completed: "Resend confirmation email",
 };
 const CONTACT_STATUS_LABELS = {
     new: "New",
@@ -48,6 +56,10 @@ async function fetchContactMessages() {
 async function updateReservationStatus(id, status) {
     const { data } = await api.patch(`/reservations/${id}/status`, { status });
     return data.reservation;
+}
+async function resendReservationEmail(id) {
+    const { data } = await api.post(`/reservations/${id}/resend-email`);
+    return data;
 }
 async function updateContactStatus(id, status) {
     const { data } = await api.patch(`/contact/${id}/status`, { status });
@@ -99,6 +111,7 @@ export function WaiterDashboard() {
     const [showHandledMessages, setShowHandledMessages] = useState(false);
     const [deletedReservationIds, setDeletedReservationIds] = useState(readDeletedReservationIds);
     const [reservationDeleteNotice, setReservationDeleteNotice] = useState("");
+    const [resendFeedback, setResendFeedback] = useState(null);
     const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
         queryKey: ["waiter-reservations", selectedDate, selectedStatus],
         queryFn: () => fetchReservations({
@@ -120,6 +133,19 @@ export function WaiterDashboard() {
             alert(extractApiError(err));
         },
     });
+    const resendEmailMutation = useMutation({
+        mutationFn: ({ id }) => resendReservationEmail(id),
+        onSuccess: (data, { id }) => {
+            setResendFeedback({ id, tone: "success", message: data?.message ?? "Email sent." });
+        },
+        onError: (err, { id }) => {
+            setResendFeedback({ id, tone: "error", message: extractApiError(err) });
+        },
+    });
+    const handleResendEmail = (id) => {
+        setResendFeedback(null);
+        resendEmailMutation.mutate({ id });
+    };
     const updateContactMutation = useMutation({
         mutationFn: ({ id, status }) => updateContactStatus(id, status),
         onSuccess: () => {
@@ -285,7 +311,7 @@ export function WaiterDashboard() {
                     <p className="text-lg">{keptReservations.length > 0 ? "All caught up" : "No reservations for this date"}</p>
                     <p className="text-sm mt-1">{keptReservations.length > 0 ? "Completed and cancelled reservations are hidden — switch the status filter to review them." : "Reservations will appear here when customers book"}</p>
                   </div>) : (<div className="space-y-4">
-                    {visibleReservations.map((reservation) => (<ReservationCard key={reservation._id} reservation={reservation} isExpanded={expandedReservation === reservation._id} onToggle={() => setExpandedReservation(expandedReservation === reservation._id ? null : reservation._id)} onStatusChange={handleStatusChange} isUpdating={updateReservationMutation.isPending} onDelete={handleDeleteReservation} isDeleting={deleteReservationMutation.isPending}/>))}
+                    {visibleReservations.map((reservation) => (<ReservationCard key={reservation._id} reservation={reservation} isExpanded={expandedReservation === reservation._id} onToggle={() => setExpandedReservation(expandedReservation === reservation._id ? null : reservation._id)} onStatusChange={handleStatusChange} isUpdating={updateReservationMutation.isPending} onDelete={handleDeleteReservation} isDeleting={deleteReservationMutation.isPending} onResendEmail={handleResendEmail} isResending={resendEmailMutation.isPending && resendEmailMutation.variables?.id === reservation._id} resendFeedback={resendFeedback?.id === reservation._id ? resendFeedback : null}/>))}
                   </div>)}
               </>) : (<>
                 {messagesLoading ? (<div className="flex items-center justify-center py-12">
@@ -303,7 +329,7 @@ export function WaiterDashboard() {
       </div>
     </div>);
 }
-function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, isUpdating, onDelete, isDeleting, }) {
+function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, isUpdating, onDelete, isDeleting, onResendEmail, isResending, resendFeedback, }) {
     return (<div className="bg-night-950 border border-white/10 rounded-xl overflow-hidden">
       <div className="flex items-center gap-2 p-4 hover:bg-white/5 transition-colors">
       <button onClick={onToggle} className="flex flex-1 min-w-0 items-center justify-between gap-4 text-left">
@@ -376,7 +402,7 @@ function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, is
               <p className="text-cream bg-night-950/50 p-3 rounded-lg">{reservation.specialRequests}</p>
             </div>)}
 
-          <div className="flex items-center gap-3 pt-2 border-t border-white/10">
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-white/10">
             <p className="text-sm text-cream/50">Update status:</p>
             <div className="flex gap-2">
               {["confirmed", "completed", "cancelled"].map((status) => (<button key={status} onClick={() => onStatusChange(reservation._id, status)} disabled={isUpdating || reservation.status === status} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${reservation.status === status
@@ -385,7 +411,15 @@ function ReservationCard({ reservation, isExpanded, onToggle, onStatusChange, is
                   {STATUS_LABELS[status]}
                 </button>))}
             </div>
+            <button type="button" onClick={() => onResendEmail(reservation._id)} disabled={isResending} title={`Send an email to ${reservation.customerEmail || reservation.email}`} className="ml-auto inline-flex items-center gap-2 rounded-lg border border-gold-400/30 bg-gold-500/10 px-3 py-1.5 text-sm font-medium text-gold-200 transition-colors hover:bg-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50">
+              {isResending ? <Loader2 className="h-4 w-4 animate-spin"/> : <Mail className="h-4 w-4"/>}
+              {RESEND_LABELS[reservation.status] ?? "Resend confirmation email"}
+            </button>
           </div>
+
+          {resendFeedback && (<p role="status" className={`text-xs ${resendFeedback.tone === "error" ? "text-red-300" : "text-emerald-300"}`}>
+              {resendFeedback.message}
+            </p>)}
         </div>)}
     </div>);
 }

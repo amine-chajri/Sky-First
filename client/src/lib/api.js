@@ -19,7 +19,9 @@ export async function fetchMenu() {
     return data.items;
 }
 export async function fetchAvailability(date) {
-    const { data } = await api.get("/reservations/availability", { params: { date } });
+    // Normalise to YYYY-MM-DD so the backend Zod regex always matches.
+    const normalised = typeof date === "string" ? date.trim() : String(date ?? "");
+    const { data } = await api.get("/reservations/availability", { params: { date: normalised } });
     return data;
 }
 export async function createReservation(payload) {
