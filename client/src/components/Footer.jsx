@@ -1,101 +1,75 @@
-import { Clock, Instagram, MapPin, Phone, Star } from "lucide-react";
-import logo from "../assets/logo.png";
+import MeadowRiseFooter from "./ui/meadow-rise-footer";
+import { useReservationModal } from "./reservation/ReservationModalContext";
 import { BUSINESS } from "../data/business";
+import logo from "../assets/logo.png";
+
+const columns = [
+    {
+        title: "Explore",
+        links: [
+            { label: "Menu", href: "/#menu" },
+            { label: "Location & Hours", href: "/#location" },
+            { label: "Reviews", href: "/#reviews" },
+            { label: "Contact", href: "/#contact" },
+        ],
+    },
+    {
+        title: "Visit",
+        links: [
+            { label: "Reserve a Table", href: "/#contact" },
+            { label: "Call Us", href: BUSINESS.phoneHref },
+            { label: "Get Directions", href: BUSINESS.mapsDirectionsHref },
+        ],
+    },
+    {
+        title: "Hours",
+        links: [
+            { label: "Monday – Sunday", href: "/#location" },
+            { label: `${BUSINESS.openHour}:00 – ${BUSINESS.closeHour}:00`, href: "/#location" },
+            { label: "Breakfast until 12:00", href: "/#menu" },
+        ],
+    },
+];
+
+const socials = [
+    { icon: "instagram", href: "#" },
+    { icon: "facebook", href: "#" },
+];
+
+const legal = [
+    { label: "Get Directions", href: BUSINESS.mapsDirectionsHref },
+    { label: "Call Us", href: BUSINESS.phoneHref },
+];
+
 export function Footer() {
-    return (<footer className="border-t border-white/10 bg-night-900/70">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 md:grid-cols-4">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="Sky First Rooftop Lounge" width={32} height={32} className="h-8 w-8 rounded-full object-cover shadow-gold-glow ring-1 ring-gold-400/30"/>
-              <div className="leading-tight">
-                <p className="font-display text-xl font-semibold text-cream">Sky First</p>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-gold-400">
-                  Rooftop Lounge
-                </p>
-              </div>
-            </div>
-            <p className="mt-4 text-sm leading-relaxed text-cream/50">
-              An upscale rooftop restaurant &amp; café in Agdal, Rabat. Continental
-              breakfast, Italian and international specialties, and specialty coffee — with
-              a panoramic view.
-            </p>
-            <div className="mt-4 flex items-center gap-1.5 text-sm text-cream/60">
-              <Star className="h-4 w-4 fill-gold-400 text-gold-400"/>
-              {BUSINESS.rating} · {BUSINESS.reviewCount} {BUSINESS.reviewProvider}
-            </div>
-          </div>
-
-          {/* Menu links */}
-          <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.25em] text-cream/40">
-              Explore
-            </h4>
-            <ul className="mt-4 space-y-2.5 text-sm">
-              {[
-            { label: "Menu", href: "#menu" },
-            { label: "Location & Hours", href: "#location" },
-            { label: "Reviews", href: "#reviews" },
-            { label: "Contact", href: "#contact" },
-        ].map((l) => (<li key={l.href}>
-                  <a href={l.href} className="text-cream/65 transition-colors hover:text-gold-300">
-                    {l.label}
-                  </a>
-                </li>))}
-            </ul>
-          </div>
-
-          {/* Hours */}
-          <div>
-            <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-cream/40">
-              <Clock className="h-4 w-4"/> Hours
-            </h4>
-            <ul className="mt-4 space-y-2.5 text-sm text-cream/65">
-              <li className="flex justify-between gap-4">
-                <span>Monday – Sunday</span>
-                <span className="font-semibold text-cream">
-                  {BUSINESS.openHour}:00 – {BUSINESS.closeHour}:00
-                </span>
-              </li>
-              <li className="text-xs text-cream/40">Breakfast served until 12:00</li>
-              <li className="text-xs text-cream/40">Kitchen closes at 22:30</li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.25em] text-cream/40">
-              Visit Us
-            </h4>
-            <ul className="mt-4 space-y-2.5 text-sm text-cream/65">
-              <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold-400"/>
-                {BUSINESS.address}
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0 text-gold-400"/>
-                <a href={BUSINESS.phoneHref} className="transition-colors hover:text-gold-300">
-                  {BUSINESS.phone}
-                </a>
-              </li>
-            </ul>
-            <div className="mt-4 flex gap-2">
-              {["Instagram", "Facebook", "TikTok"].map((s) => (<a key={s} href="#top" aria-label={s} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-cream/60 transition-all hover:border-gold-400/60 hover:text-gold-300">
-                  {s === "Instagram" ? (<Instagram className="h-4 w-4"/>) : (<span className="text-xs font-bold">{s[0]}</span>)}
-                </a>))}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-cream/35 sm:flex-row">
-          <p>
-            © {new Date().getFullYear()} {BUSINESS.name}. All rights reserved.
-          </p>
-          <p>
-            {BUSINESS.shortAddress} · {BUSINESS.plusCode}
-          </p>
-        </div>
-      </div>
-    </footer>);
+    const { openReservation } = useReservationModal();
+    return (
+        <MeadowRiseFooter
+            name={BUSINESS.name}
+            brandHref="/"
+            logo={<img src={logo} alt={`${BUSINESS.name} logo`} className="h-9 w-9 rounded-full object-cover ring-1 ring-gold-400/30" />}
+            heading={"Take the *first step*\nup to Sky First."}
+            subheading="Reserve a table, explore the menu, or simply say hello — we're open every day."
+            cta={{
+                label: "Reserve a Table",
+                href: "/#contact",
+                onClick: (event) => {
+                    event.preventDefault();
+                    openReservation();
+                },
+            }}
+            tagline="An upscale rooftop restaurant & café in Agdal, Rabat. Continental breakfast, Italian and international specialties, and specialty coffee — with a panoramic view."
+            newsletter
+            placeholder="Your email for Sky First news"
+            successMessage="Thanks for subscribing. We'll send you Sky First news soon."
+            columns={columns}
+            socials={socials}
+            legal={legal}
+            preset="obsidian"
+            botanicals={false}
+            className="border-t border-amber-500/25"
+            fontFamily='"Inter", system-ui, sans-serif'
+            serifFamily='"Cormorant Garamond", Georgia, serif'
+        />
+    );
 }
