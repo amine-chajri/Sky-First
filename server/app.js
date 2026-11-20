@@ -4,6 +4,7 @@ import helmetImport from "helmet";
 import morgan from "morgan";
 
 import { config } from "./config/index.js";
+import { connectDB } from "./config/db.js";
 import { errorHandler, notFoundHandler } from "./middleware/index.js";
 import menuRoutes from "./routes/menu.js";
 import reservationRoutes from "./routes/reservations.js";
@@ -27,6 +28,25 @@ export function createApp() {
   );
   app.use(express.json({ limit: "50kb" }));
   app.use(morgan("dev"));
+
+  let dbPromise;
+  const ensureDb = () => {
+    if (!dbPromise) {
+      dbPromise = connectDB().catch((err) => {
+        dbPromise = null;
+        throw err;
+      });
+    }
+    return dbPromise;
+  };
+  app.use(async (req, res, next) => {
+    try {
+      await ensureDb();
+      next();
+    } catch (err) {
+      next(err);
+    }
+  });
 
   app.get("/", (req, res) => res.json({ message: "Server is running" }));
   app.use("/api/health", healthRoutes);
