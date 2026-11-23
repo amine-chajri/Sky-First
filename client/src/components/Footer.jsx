@@ -67,7 +67,7 @@ export function Footer() {
             legal={legal}
             preset="obsidian"
             botanicals={false}
-            className="border-t border-amber-500/25"
+            className="border border-gold-400/20 shadow-gold-glow"
             fontFamily='"Inter", system-ui, sans-serif'
             serifFamily='"Cormorant Garamond", Georgia, serif'
         />

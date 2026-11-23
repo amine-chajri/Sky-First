@@ -1481,7 +1481,7 @@ function MeadowRiseFooter({
 
         <div className="mrf-wrap">
           <div className="mrf-grid">
-            <div className="mrf-brand rounded-2xl border border-amber-500/15 bg-zinc-900/30 p-6 backdrop-blur-sm">
+              <div className="mrf-brand rounded-2xl border border-gold-400/20 bg-night-900/80 p-6 backdrop-blur-sm shadow-gold-glow">
               <a className="mrf-logo mrf-r" href={brandHref} style={{ "--d": 1250 }}>
                 {logo ?? <PetalMark />}
                 <span>{name}</span>
@@ -1533,7 +1533,7 @@ function MeadowRiseFooter({
             </div>
 
             <nav className="mrf-cols" aria-label="Footer">
-              {columns.map((col, ci) => <div className="mrf-col rounded-2xl border border-amber-500/20 bg-zinc-900/40 p-5 backdrop-blur-sm transition-colors duration-300 hover:border-yellow-400/50 hover:bg-zinc-900/60" key={col.title + ci}>
+              {columns.map((col, ci) => <div className="mrf-col rounded-2xl border border-gold-400/20 bg-night-900/80 p-5 backdrop-blur-sm transition-colors duration-300 shadow-gold-glow hover:border-gold-400/50 hover:bg-night-800/60" key={col.title + ci}>
                   <h3 className="mrf-r text-amber-300!" style={{ "--d": 1300 + ci * 90 }}>
                     {col.title}
                   </h3>
@@ -1545,7 +1545,7 @@ function MeadowRiseFooter({
                       </li>)}
                   </ul>
                 </div>)}
-              {socials.length ? <div className="mrf-col rounded-2xl border border-amber-500/20 bg-zinc-900/40 p-5 backdrop-blur-sm transition-colors duration-300 hover:border-yellow-400/50 hover:bg-zinc-900/60">
+              {socials.length ? <div className="mrf-col rounded-2xl border border-gold-400/20 bg-night-900/80 p-5 backdrop-blur-sm transition-colors duration-300 shadow-gold-glow hover:border-gold-400/50 hover:bg-night-800/60">
                   {socialTitle ? <h3 className="mrf-r text-amber-300!" style={{ "--d": 1300 + columns.length * 90 }}>
                       {socialTitle}
                     </h3> : null}
